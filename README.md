@@ -1,1 +1,1 @@
-# autoadmin
+# admin-kit
