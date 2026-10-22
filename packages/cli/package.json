@@ -1,0 +1,32 @@
+{
+  "name": "@admin-kit/cli",
+  "version": "0.1.0",
+  "description": "CLI tool for AdminKit OpenAPI introspection and configuration management",
+  "type": "module",
+  "bin": {
+    "admin-kit": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node --experimental-strip-types --test test/cli.test.ts",
+    "lint": "tsc --noEmit",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
+  },
+  "dependencies": {
+    "@admin-kit/core": "workspace:*",
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "commander": "^12.0.0",
+    "yaml": "^2.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}

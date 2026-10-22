@@ -1,0 +1,163 @@
+version: "1.0"
+project:
+  name: Acme API
+  base_url: /api
+  branding:
+    primary_color: "#4f46e5"
+    theme: system
+auth:
+  strategy: bearer
+  login_endpoint: /auth/login
+  me_endpoint: /auth/me
+  token_storage: sessionStorage
+  role_claim_path: roles
+  permission_claim_path: permissions
+access:
+  default_policy: deny
+  superadmin_roles:
+    - superadmin
+resources:
+  users:
+    label: Users
+    endpoint: /users
+    primary_key: id
+    table:
+      page_size: 20
+      searchable_fields:
+        - email
+      filterable_fields:
+        - role
+      columns:
+        - key: id
+          label: ID
+          type: string
+          sortable: false
+          copyable: true
+          sensitive: false
+          hidden_by_default: false
+        - key: email
+          label: Email
+          type: string
+          sortable: false
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+        - key: role
+          label: Role
+          type: badge
+          sortable: false
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+          badge_map:
+            user: blue
+            admin: purple
+        - key: created_at
+          label: Created At
+          type: datetime
+          sortable: true
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+    mutations:
+      creatable: false
+      editable: false
+      deletable: false
+    actions: []
+  refunds:
+    label: Refunds
+    endpoint: /refunds
+    primary_key: id
+    table:
+      page_size: 20
+      searchable_fields: []
+      filterable_fields:
+        - status
+      columns:
+        - key: id
+          label: ID
+          type: string
+          sortable: false
+          copyable: true
+          sensitive: false
+          hidden_by_default: false
+        - key: user_id
+          label: User
+          type: relation
+          sortable: false
+          copyable: true
+          sensitive: false
+          hidden_by_default: false
+          relation:
+            target_resource: users
+            value_field: id
+            display_field: email
+        - key: amount
+          label: Amount
+          type: currency
+          sortable: true
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+        - key: status
+          label: Status
+          type: badge
+          sortable: false
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+          badge_map:
+            pending: yellow
+            approved: green
+            rejected: red
+    mutations:
+      creatable: false
+      editable: false
+      deletable: false
+    actions:
+      - name: approve
+        label: Approve
+        style: success
+        scope: row
+        visible_if: row.status == 'pending'
+        confirm_dialog:
+          title: Approve Refund?
+          message: Are you sure you want to approve this refund?
+          confirm_text: Approve
+          cancel_text: Cancel
+        api:
+          endpoint: /refunds/{id}/approve
+          method: POST
+        inputs: []
+        on_success:
+          toast: Refund approved successfully.
+          invalidate:
+            - refunds
+      - name: reject
+        label: Reject
+        style: danger
+        scope: row
+        visible_if: row.status == 'pending'
+        api:
+          endpoint: /refunds/{id}/reject
+          method: POST
+        inputs:
+          - key: reason
+            label: Reason
+            type: select
+            required: true
+            options:
+              - label: Fraud
+                value: fraud
+              - label: Expired
+                value: expired
+              - label: Duplicate
+                value: duplicate
+          - key: notes
+            label: Notes
+            type: textarea
+            required: false
+        on_success:
+          toast: Refund rejected successfully.
+          invalidate:
+            - refunds

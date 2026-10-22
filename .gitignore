@@ -1,0 +1,7 @@
+node_modules
+dist
+.turbo
+.admin-kit
+*.log
+.DS_Store
+.admin-kit/
