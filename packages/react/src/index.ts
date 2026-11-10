@@ -26,5 +26,16 @@ export {
   type AppShellProps,
 } from "./components/layout/AppShell";
 
+// Form and Modal components
+export {
+  DynamicForm,
+  type DynamicFormProps,
+} from "./components/form/DynamicForm";
+
+export {
+  ActionExecutionModal,
+  type ActionExecutionModalProps,
+} from "./components/modals/ActionExecutionModal";
+
 // Styles
 import "./styles/admin-studio.css";

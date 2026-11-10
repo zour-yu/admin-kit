@@ -9,7 +9,7 @@ export interface AdminStudioProps {
   configUrl?: string;
   initialResourceKey?: string;
   data?: Record<string, any[]>;
-  onExecuteAction?: (action: ActionConfig, row: any) => void;
+  onExecuteAction?: (action: ActionConfig, row: any, payload?: Record<string, any>) => void | Promise<void>;
 }
 
 /**
