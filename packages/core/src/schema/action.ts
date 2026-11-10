@@ -52,20 +52,51 @@ export const ActionOnSuccessSchema = z.object({
 });
 export type ActionOnSuccess = z.infer<typeof ActionOnSuccessSchema>;
 
-/**
- * Custom RPC workflow action specification.
- */
-export const ActionConfigSchema = z.object({
+const BaseActionConfigSchema = z.object({
   name: z.string().min(1, "Action name is required"),
   label: z.string().min(1, "Action label is required"),
   icon: z.string().optional(),
   style: ActionStyleSchema.default("primary"),
-  scope: ActionScopeSchema.default("row"),
-  visible_if: z.string().optional(),
   access: AccessRuleSchema.optional(),
   confirm_dialog: ConfirmDialogSchema.optional(),
   api: ActionApiSchema,
   inputs: z.array(FormFieldSchema).optional().default([]),
   on_success: ActionOnSuccessSchema.optional(),
 });
+
+export const RowActionConfigSchema = BaseActionConfigSchema.extend({
+  scope: z.literal("row"),
+  visible_if: z.string().optional(),
+});
+export type RowActionConfig = z.infer<typeof RowActionConfigSchema>;
+
+export const BulkActionConfigSchema = BaseActionConfigSchema.extend({
+  scope: z.literal("bulk"),
+  visible_if: z.string().optional(),
+});
+export type BulkActionConfig = z.infer<typeof BulkActionConfigSchema>;
+
+export const GlobalActionConfigSchema = BaseActionConfigSchema.extend({
+  scope: z.literal("global"),
+  visible_if: z.string().optional(),
+});
+export type GlobalActionConfig = z.infer<typeof GlobalActionConfigSchema>;
+
+/**
+ * Discriminated union of action specifications based on execution scope.
+ * Automatically defaults omitted scope to "row".
+ */
+export const ActionConfigSchema = z.preprocess(
+  (val: any) => {
+    if (val && typeof val === "object" && !val.scope) {
+      return { ...val, scope: "row" };
+    }
+    return val;
+  },
+  z.discriminatedUnion("scope", [
+    RowActionConfigSchema,
+    BulkActionConfigSchema,
+    GlobalActionConfigSchema,
+  ])
+);
 export type ActionConfig = z.infer<typeof ActionConfigSchema>;

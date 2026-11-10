@@ -57,7 +57,7 @@ function buildSchemaSummary(config: AdminKitConfig): string {
         key: col.key,
         type: col.type,
         current_label: col.label,
-        current_badge_map: col.badge_map,
+        current_badge_map: col.type === "badge" ? col.badge_map : undefined,
         sensitive: col.sensitive,
       })),
       actions: (res.actions || []).map((act) => ({
@@ -177,9 +177,10 @@ export function deepMergeAiEnrichment(
         }
 
         if (colEnrich.badge_map && Object.keys(colEnrich.badge_map).length > 0) {
-          targetCol.type = "badge";
-          targetCol.badge_map = {
-            ...(targetCol.badge_map || {}),
+          const colAny = targetCol as any;
+          colAny.type = "badge";
+          colAny.badge_map = {
+            ...(colAny.badge_map || {}),
             ...colEnrich.badge_map,
           };
         }

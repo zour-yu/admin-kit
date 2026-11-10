@@ -66,13 +66,16 @@ export function mergeConfigs(
             addedColumns.push(`${resKey}.${newCol.key}`);
           } else {
             // Existing column: only fill missing properties without overriding user customizations
-            const existingCol = existingRes.table.columns.find((c) => c.key === newCol.key)!;
-            if (!existingCol.type && newCol.type) existingCol.type = newCol.type;
-            if (existingCol.badge_map === undefined && newCol.badge_map) {
-              existingCol.badge_map = newCol.badge_map;
+            const existingCol = existingRes.table.columns.find((c) => c.key === newCol.key)! as any;
+            const newColAny = newCol as any;
+            if (!existingCol.type && newColAny.type) existingCol.type = newColAny.type;
+            if (newColAny.badge_map && !existingCol.badge_map) {
+              existingCol.type = "badge";
+              existingCol.badge_map = newColAny.badge_map;
             }
-            if (existingCol.relation === undefined && newCol.relation) {
-              existingCol.relation = newCol.relation;
+            if (newColAny.relation && !existingCol.relation) {
+              existingCol.type = "relation";
+              existingCol.relation = newColAny.relation;
             }
           }
         }

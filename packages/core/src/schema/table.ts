@@ -23,21 +23,88 @@ export const ColumnTypeSchema = z.enum([
 export type ColumnType = z.infer<typeof ColumnTypeSchema>;
 
 /**
- * Specification for an individual column in a resource table.
+ * Base properties shared across all table column definitions.
  */
-export const TableColumnSchema = z.object({
+const BaseTableColumnSchema = z.object({
   key: z.string().min(1, "Column key is required"),
   label: z.string().min(1, "Column label is required"),
-  type: ColumnTypeSchema,
   sortable: z.boolean().default(false),
   copyable: z.boolean().default(false),
   sensitive: z.boolean().default(false),
   hidden_by_default: z.boolean().optional().default(false),
-  currency_code: z.string().optional(),
-  badge_map: z.record(z.string(), z.string()).optional(),
-  relation: RelationConfigSchema.optional(),
   access: AccessRuleSchema.optional(),
 });
+
+export const StringTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("string"),
+});
+export type StringTableColumn = z.infer<typeof StringTableColumnSchema>;
+
+export const NumberTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("number"),
+});
+export type NumberTableColumn = z.infer<typeof NumberTableColumnSchema>;
+
+export const BooleanTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("boolean"),
+});
+export type BooleanTableColumn = z.infer<typeof BooleanTableColumnSchema>;
+
+export const DateTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("date"),
+});
+export type DateTableColumn = z.infer<typeof DateTableColumnSchema>;
+
+export const DatetimeTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("datetime"),
+});
+export type DatetimeTableColumn = z.infer<typeof DatetimeTableColumnSchema>;
+
+export const JsonTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("json"),
+});
+export type JsonTableColumn = z.infer<typeof JsonTableColumnSchema>;
+
+export const ImageTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("image"),
+});
+export type ImageTableColumn = z.infer<typeof ImageTableColumnSchema>;
+
+export const CurrencyTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("currency"),
+  currency_code: z.string().optional(),
+});
+export type CurrencyTableColumn = z.infer<typeof CurrencyTableColumnSchema>;
+
+export const BadgeTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("badge"),
+  badge_map: z.record(z.string(), z.string()).optional(),
+});
+export type BadgeTableColumn = z.infer<typeof BadgeTableColumnSchema>;
+
+export const RelationTableColumnSchema = BaseTableColumnSchema.extend({
+  type: z.literal("relation"),
+  relation: RelationConfigSchema.optional(),
+});
+export type RelationTableColumn = z.infer<typeof RelationTableColumnSchema>;
+
+/**
+ * Discriminated union of all table column types.
+ * Enforces type safety so properties like `badge_map` only exist on `badge` columns,
+ * `relation` only exists on `relation` columns, and `currency_code` on `currency` columns.
+ */
+export const TableColumnSchema = z.discriminatedUnion("type", [
+  StringTableColumnSchema,
+  NumberTableColumnSchema,
+  BooleanTableColumnSchema,
+  CurrencyTableColumnSchema,
+  DateTableColumnSchema,
+  DatetimeTableColumnSchema,
+  BadgeTableColumnSchema,
+  RelationTableColumnSchema,
+  JsonTableColumnSchema,
+  ImageTableColumnSchema,
+]);
 export type TableColumn = z.infer<typeof TableColumnSchema>;
 
 /**

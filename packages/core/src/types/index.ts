@@ -31,6 +31,16 @@ export type {
 export type {
   ColumnType,
   TableColumn,
+  StringTableColumn,
+  NumberTableColumn,
+  BooleanTableColumn,
+  DateTableColumn,
+  DatetimeTableColumn,
+  JsonTableColumn,
+  ImageTableColumn,
+  CurrencyTableColumn,
+  BadgeTableColumn,
+  RelationTableColumn,
   DefaultSort,
   TableConfig,
 } from "../schema/table";
@@ -48,6 +58,9 @@ export type {
   ConfirmDialog,
   ActionApi,
   ActionOnSuccess,
+  RowActionConfig,
+  BulkActionConfig,
+  GlobalActionConfig,
   ActionConfig,
 } from "../schema/action";
 

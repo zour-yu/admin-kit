@@ -2,12 +2,11 @@
  * Safe, sandboxed expression evaluator for `visible_if` conditions.
  *
  * Implements strict zero-eval AST evaluation per docs/ARCHITECTURE.md Section 6.
- * Supports:
- * - Field access: `row.<field>`, `user.<field>`
- * - Comparisons: `==`, `===`, `!=`, `!==`, `>`, `<`, `>=`, `<=`
- * - Set membership: `'value' in user.roles` or `row.status in ['pending', 'review']`
- * - Logical operators: `&&`, `||`, `!`
- * - Literals: strings ('foo', "bar"), numbers (42, 3.14), booleans (true, false), null, undefined
+ * Security & Sandbox Guarantees:
+ * - Strictly parses tokenized recursive-descent grammar without code generation.
+ * - Zero eval(): No eval(), new Function(), or indirect eval variants exist.
+ * - Prototype pollution defense: Blocks lookups for __proto__, constructor, and prototype.
+ * - Safe missing property resolution: Undefined fields evaluate cleanly to false/undefined without throwing.
  */
 
 export interface EvaluationContext {
@@ -20,6 +19,29 @@ export interface EvaluationContext {
     permissions?: string[];
     [key: string]: any;
   };
+}
+
+const FORBIDDEN_PROPERTIES = new Set(["__proto__", "constructor", "prototype"]);
+
+function isForbiddenProperty(prop: string): boolean {
+  return FORBIDDEN_PROPERTIES.has(prop);
+}
+
+/**
+ * Robust equality comparison supporting loose JSON string/number equivalence
+ * while ensuring undefined/null are not mistakenly matched against string literals.
+ */
+function compareEqual(left: any, right: any): boolean {
+  if (left === right) return true;
+  // Loose equality between null and undefined matches JS standard behavior
+  if ((left === null && right === undefined) || (left === undefined && right === null)) {
+    return true;
+  }
+  // Null or undefined does not match string representations like "undefined" or "null"
+  if (left === null || left === undefined || right === null || right === undefined) {
+    return false;
+  }
+  return String(left) === String(right);
 }
 
 type TokenType =
@@ -253,11 +275,10 @@ class SafeEvaluator {
     while (true) {
       if (this.match("OPERATOR", "==") || this.match("OPERATOR", "===")) {
         const right = this.relational();
-        // Loose equality check for robust JSON string/number comparison
-        left = String(left) === String(right) || left === right;
+        left = compareEqual(left, right);
       } else if (this.match("OPERATOR", "!=") || this.match("OPERATOR", "!==")) {
         const right = this.relational();
-        left = String(left) !== String(right) && left !== right;
+        left = !compareEqual(left, right);
       } else {
         break;
       }
@@ -283,7 +304,9 @@ class SafeEvaluator {
         left = Number(left) <= Number(right);
       } else if (this.match("OPERATOR", "in")) {
         const right = this.unary();
-        if (Array.isArray(right)) {
+        if (isForbiddenProperty(String(left))) {
+          left = false;
+        } else if (Array.isArray(right)) {
           left = right.includes(left);
         } else if (typeof right === "object" && right !== null) {
           left = Object.prototype.hasOwnProperty.call(right, left);
@@ -345,7 +368,13 @@ class SafeEvaluator {
       return undefined;
     }
 
-    const rootName = rootToken.value;
+    const rootName = String(rootToken.value);
+
+    // Prototype pollution guard on root identifier
+    if (isForbiddenProperty(rootName)) {
+      return undefined;
+    }
+
     let targetObj: any;
 
     if (rootName === "row") {
@@ -354,9 +383,9 @@ class SafeEvaluator {
       targetObj = this.context.user;
     } else {
       // Check if rootName exists directly in context.row or context.user
-      if (this.context.row && rootName in this.context.row) {
+      if (this.context.row && Object.prototype.hasOwnProperty.call(this.context.row, rootName)) {
         targetObj = this.context.row[rootName];
-      } else if (this.context.user && rootName in this.context.user) {
+      } else if (this.context.user && Object.prototype.hasOwnProperty.call(this.context.user, rootName)) {
         targetObj = this.context.user[rootName];
       } else {
         targetObj = undefined;
@@ -366,9 +395,24 @@ class SafeEvaluator {
     while (this.match("DOT")) {
       const propToken = this.peek();
       if (this.match("IDENTIFIER")) {
-        if (targetObj && typeof targetObj === "object") {
-          targetObj = targetObj[propToken.value];
+        const propName = String(propToken.value);
+
+        // Strict prototype pollution guard: block __proto__, constructor, prototype
+        if (isForbiddenProperty(propName)) {
+          targetObj = undefined;
+          continue;
+        }
+
+        if (targetObj !== null && targetObj !== undefined && typeof targetObj === "object") {
+          if (Object.prototype.hasOwnProperty.call(targetObj, propName)) {
+            targetObj = targetObj[propName];
+          } else if (propName in targetObj && !Object.prototype.hasOwnProperty.call(Object.prototype, propName)) {
+            targetObj = targetObj[propName];
+          } else {
+            targetObj = undefined;
+          }
         } else {
+          // Intermediate property was undefined or null - resolve safely to undefined
           targetObj = undefined;
         }
       }
@@ -402,4 +446,3 @@ export function evaluateExpression(
     return false;
   }
 }
-

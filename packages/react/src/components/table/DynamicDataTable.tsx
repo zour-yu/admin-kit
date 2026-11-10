@@ -69,7 +69,16 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
     return [];
   });
 
+  const [searchInput, setSearchInput] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setGlobalFilter(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const [selectedFilterField, setSelectedFilterField] = useState<string>("");
   const [selectedFilterValue, setSelectedFilterValue] = useState<string>("");
 
@@ -191,8 +200,8 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
               type="text"
               className="ak-search-input"
               placeholder={`Search ${resource.label.toLowerCase()}...`}
-              value={globalFilter ?? ""}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
@@ -315,7 +324,9 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
         <div>
           Showing{" "}
           <strong>
-            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+            {filteredData.length === 0
+              ? 0
+              : table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
           </strong>{" "}
           to{" "}
           <strong>

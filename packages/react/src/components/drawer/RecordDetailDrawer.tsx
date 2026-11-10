@@ -1,5 +1,6 @@
 import React from "react";
 import type { ResourceConfig, ActionConfig } from "@admin-kit/core";
+import { evaluateExpression } from "@admin-kit/core";
 import { CellRenderer } from "../table/CellRenderer";
 import { X, Copy, Check, Code, Layers } from "lucide-react";
 
@@ -46,17 +47,7 @@ export const RecordDetailDrawer: React.FC<RecordDetailDrawerProps> = ({
   const permittedActions = (resource.actions || []).filter((action) => {
     if (action.scope !== "row") return false;
     if (action.visible_if) {
-      try {
-        const match = action.visible_if.match(/row\.(\w+)\s*(===?|!==?)\s*['"]([^'"]+)['"]/);
-        if (match) {
-          const [, field, op, targetVal] = match;
-          const actualVal = String(record[field]);
-          if (op.startsWith("==")) return actualVal === targetVal;
-          if (op.startsWith("!=")) return actualVal !== targetVal;
-        }
-      } catch {
-        return true;
-      }
+      return evaluateExpression(action.visible_if, { row: record });
     }
     return true;
   });

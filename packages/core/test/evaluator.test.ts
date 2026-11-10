@@ -93,9 +93,43 @@ test("evaluateExpression: set membership (in)", () => {
   );
 });
 
+test("evaluateExpression: prototype pollution defenses", () => {
+  const context = {
+    row: {
+      status: "pending",
+    },
+    user: {
+      role: "user",
+    },
+  };
+
+  // Prototype properties must be blocked and resolve to undefined
+  assert.equal(evaluateExpression("row.__proto__ != undefined", context), false);
+  assert.equal(evaluateExpression("row.constructor != undefined", context), false);
+  assert.equal(evaluateExpression("row.prototype != undefined", context), false);
+  assert.equal(evaluateExpression("'__proto__' in row", context), false);
+  assert.equal(evaluateExpression("'constructor' in row", context), false);
+  assert.equal(evaluateExpression("'prototype' in row", context), false);
+});
+
+test("evaluateExpression: safe missing/undefined properties", () => {
+  const context = {
+    row: {
+      status: "pending",
+    },
+  };
+
+  // Missing properties should cleanly evaluate to false without throwing or matching "undefined" string
+  assert.equal(evaluateExpression("row.nonexistent == 'pending'", context), false);
+  assert.equal(evaluateExpression("row.nonexistent == 'undefined'", context), false);
+  assert.equal(evaluateExpression("row.nonexistent == undefined", context), true);
+  assert.equal(evaluateExpression("row.nonexistent == null", context), true);
+  assert.equal(evaluateExpression("row.missing.nested.property == 'val'", context), false);
+  assert.equal(evaluateExpression("row.missing.nested.property != 'val'", context), true);
+});
+
 test("evaluateExpression: error resilience and invalid syntax fallback", () => {
   // Invalid syntax should fail gracefully to false without throwing or crashing
   assert.equal(evaluateExpression("row.status = = = 'broken"), false);
   assert.equal(evaluateExpression("((((( unclosed"), false);
 });
-

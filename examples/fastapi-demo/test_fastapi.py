@@ -42,6 +42,18 @@ def run_tests():
     assert '<div id="root">' in res_subpath.text
     print("  ✓ Client-side subpath refresh returned SPA HTML (no 404)")
 
+    print("Testing deep client-side route refresh (GET /admin/resources/refunds)...")
+    res_deep = client.get("/admin/resources/refunds")
+    assert res_deep.status_code == 200
+    assert '<div id="root">' in res_deep.text
+    print("  ✓ Deep client-side route (resources/refunds) returned SPA HTML (no 404)")
+
+    print("Testing deep item client-side route refresh (GET /admin/resources/refunds/ref_801)...")
+    res_item = client.get("/admin/resources/refunds/ref_801")
+    assert res_item.status_code == 200
+    assert '<div id="root">' in res_item.text
+    print("  ✓ Deep item route (resources/refunds/ref_801) returned SPA HTML (no 404)")
+
     # 5. Verify Mock REST Endpoints
     print("Testing GET /api/users...")
     res_users = client.get("/api/users")

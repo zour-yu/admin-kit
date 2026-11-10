@@ -50,7 +50,7 @@ function resolveMutationFields(
       }
 
       const options =
-        col.badge_map
+        col.type === "badge" && col.badge_map
           ? Object.keys(col.badge_map).map((opt) => ({
               label: opt.charAt(0).toUpperCase() + opt.slice(1).replace("_", " "),
               value: opt,

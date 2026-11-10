@@ -129,8 +129,8 @@ export const DoctorConsoleDrawer: React.FC<DoctorConsoleDrawerProps> = ({
     }
 
     // 3. Unmapped Badge State & Color Check
-    const badgeCols = columns.filter((c) => c.type === "badge" && c.badge_map);
-    for (const col of badgeCols) {
+    for (const col of columns) {
+      if (col.type !== "badge" || !col.badge_map) continue;
       const badgeMap = col.badge_map || {};
       for (const row of activeRows) {
         const val = row[col.key];

@@ -51,7 +51,79 @@ export function saveSnapshot(targetDir: string, spec: unknown): void {
 }
 
 /**
- * Writes an AdminKitConfig object to the target file path formatted as YAML.
+ * Sorts object keys according to a preferred order with remainder sorted alphabetically.
+ */
+function sortObjectKeys(obj: any, preferredOrder: string[] = []): any {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
+    return obj;
+  }
+  const ordered: Record<string, any> = {};
+  for (const key of preferredOrder) {
+    if (key in obj) {
+      ordered[key] = obj[key];
+    }
+  }
+  const remainingKeys = Object.keys(obj)
+    .filter((k) => !preferredOrder.includes(k))
+    .sort();
+  for (const key of remainingKeys) {
+    ordered[key] = obj[key];
+  }
+  return ordered;
+}
+
+/**
+ * Normalizes an AdminKitConfig object into a canonical, deterministic key order.
+ * Ensures zero-churn git diffs across successive CLI pull / merge runs.
+ */
+export function canonicalizeConfig(config: AdminKitConfig): AdminKitConfig {
+  const topKeys = ["version", "project", "auth", "access", "resources", "rbac"];
+  const resKeys = ["label", "icon", "endpoint", "primary_key", "access", "table", "mutations", "actions"];
+  const tableKeys = ["page_size", "default_sort", "searchable_fields", "filterable_fields", "columns"];
+  const colKeys = ["key", "label", "type", "sortable", "copyable", "sensitive", "hidden_by_default", "badge_map", "relation", "currency_code", "access"];
+  const actKeys = ["name", "label", "icon", "style", "scope", "visible_if", "access", "confirm_dialog", "api", "inputs", "on_success"];
+
+  const canonical: any = sortObjectKeys(config, topKeys);
+
+  if (canonical.resources && typeof canonical.resources === "object") {
+    const sortedResources: Record<string, any> = {};
+    const sortedResourceNames = Object.keys(canonical.resources).sort();
+
+    for (const name of sortedResourceNames) {
+      const res = canonical.resources[name];
+      if (!res || typeof res !== "object") {
+        sortedResources[name] = res;
+        continue;
+      }
+
+      const resObj = sortObjectKeys(res, resKeys);
+
+      if (resObj.table && typeof resObj.table === "object") {
+        resObj.table = sortObjectKeys(resObj.table, tableKeys);
+        if (Array.isArray(resObj.table.columns)) {
+          resObj.table.columns = resObj.table.columns.map((col: any) =>
+            sortObjectKeys(col, colKeys)
+          );
+        }
+      }
+
+      if (Array.isArray(resObj.actions)) {
+        resObj.actions = resObj.actions.map((act: any) =>
+          sortObjectKeys(act, actKeys)
+        );
+      }
+
+      sortedResources[name] = resObj;
+    }
+
+    canonical.resources = sortedResources;
+  }
+
+  return canonical;
+}
+
+/**
+ * Writes an AdminKitConfig object to the target file path formatted as YAML with deterministic key ordering.
  */
 export function writeConfigFile(outputPath: string, config: AdminKitConfig): void {
   const dir = path.dirname(path.resolve(outputPath));
@@ -59,7 +131,9 @@ export function writeConfigFile(outputPath: string, config: AdminKitConfig): voi
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  const yamlContent = stringifyYaml(config, {
+  const canonical = canonicalizeConfig(config);
+
+  const yamlContent = stringifyYaml(canonical, {
     indent: 2,
     lineWidth: 0,
   });

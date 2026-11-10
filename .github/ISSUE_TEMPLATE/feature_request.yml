@@ -1,0 +1,41 @@
+name: Feature Request
+description: Suggest an idea or enhancement for AdminKit.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome ideas for new adapters, column types, or CLI enhancements!
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      options:
+        - "CLI / OpenAPI Parser"
+        - "UI Engine / Components"
+        - "Backend Adapters (Express / FastAPI / new framework)"
+        - "AI Synthesis Engine"
+        - "RBAC & Security"
+        - "Documentation"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear description of the limitation or workflow hurdle.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: A description of what you want to happen and how it might be implemented.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you've evaluated.
+
