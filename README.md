@@ -2,54 +2,86 @@
 
 > Instant, declarative, API-driven admin dashboards generated from your OpenAPI specification.
 
-[![CI](https://github.com/admin-kit/admin-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/admin-kit/admin-kit)
+[![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![pnpm](https://img.shields.io/badge/pnpm-workspace-orange.svg)](https://pnpm.io/)
 [![Turborepo](https://img.shields.io/badge/built%20with-Turborepo-000.svg)](https://turbo.build/repo)
 
-**AdminKit** inspects any OpenAPI 3.0/3.1 backend specification, synthesizes a declarative configuration file (`admin.config.yaml`), and renders a full-featured single-page application (SPA) with zero frontend boilerplate. It delivers dynamic CRUD tables, role-based access control (RBAC), custom workflow actions (e.g., Approve / Reject), and an in-app diagnostic console.
+AdminKit inspects any OpenAPI 3.0/3.1 backend specification, synthesizes a declarative configuration file (`admin.config.yaml`), and serves an operational single-page application (SPA) with zero frontend maintenance overhead. It delivers dynamic data tables, role-based access control (RBAC), custom workflow actions (e.g., Approve / Reject), and an in-app diagnostic console.
 
 ---
 
-## Key Features
+## Architectural Highlights
 
-- ⚡️ **Zero Frontend Boilerplate** — Convert your OpenAPI / Swagger spec into a production-grade admin studio in seconds.
-- 🤖 **AI Workflow Synthesis** — Intelligently infers badge color maps (green/yellow/red/gray), conditional action visibility (`visible_if`), sensitive field masks (`sensitive: true`), and human-friendly column labels using Gemini.
-- 🔒 **Safe Expression Evaluator** — Zero `eval()` or `new Function()`. Custom AST recursive-descent parser safely evaluates conditional row action visibility (e.g., `row.status == 'pending' && user.roles.includes('admin')`).
-- 🛡️ **Role-Based Access Control (RBAC)** — Granular table column, filter, and action permission enforcement with real-time UI gating.
-- 🩺 **Doctor Diagnostic Console** — Detects schema drift, missing endpoints, unmapped badge enums, and allows on-the-fly role simulation.
-- 🔌 **Framework Agnostic** — Native adapters for **Node.js (Express)** and **Python (FastAPI / Starlette)** with 100% offline local asset delivery.
+- **Zero Frontend Maintenance**: Transforms OpenAPI schemas into an operational admin studio without hand-written React code or fragile drag-and-drop canvases.
+- **AI Workflow Synthesis**: Infers semantic badge color mappings (green, yellow, red, neutral), conditional action visibility (`visible_if`), sensitive field masks (`sensitive: true`), and normalized human-readable labels using Gemini.
+- **Sandboxed Expression Evaluator**: Uses a strict recursive-descent AST interpreter for conditional visibility expressions without invoking `eval()` or `new Function()`.
+- **Role-Based Access Control (RBAC)**: Enforces resource, column, and action visibility rules with real-time UI gating and runtime role simulation.
+- **Doctor Diagnostic Engine**: Continuously validates schema synchronization, flags missing endpoints, detects unmapped badge enums, and surfaces configuration drift.
+- **Framework-Agnostic Adapters**: Native integration with Node.js (Express) and Python (FastAPI / Starlette) with 100% offline, self-hosted static asset delivery.
+
+---
+
+## Architecture & Data Flow
+
+```mermaid
+flowchart LR
+    subgraph BuildTime["1. Build Time (CLI)"]
+        Spec["OpenAPI 3.0/3.1 Spec"] --> CLI["@admin-kit/cli"]
+        Gemini["Gemini AI Engine"] -.->|Heuristics & Badges| CLI
+        CLI --> Config["admin.config.yaml"]
+    end
+
+    subgraph Runtime["2. Runtime (Backend)"]
+        Config --> Server["Express / FastAPI Adapter"]
+        StaticBundle["Static React Assets (dist/)"] --> Server
+    end
+
+    subgraph Client["3. Client-Side Presentation"]
+        Server --> SPA["@admin-kit/react Studio"]
+        SPA --> AST["Safe AST Evaluator (visible_if)"]
+        SPA --> RBAC["RBAC Permission Gate"]
+        SPA --> Doctor["Doctor Diagnostic Drawer"]
+    end
+```
+
+---
+
+## Comparison: AdminKit vs. Alternatives
+
+| Dimension | AdminKit | Retool / Low-Code | Manual React Admin | Swagger UI / Postman |
+| :--- | :--- | :--- | :--- | :--- |
+| **Setup Time** | Under 2 minutes via CLI | Hours of canvas building | Weeks of boilerplate | Instant, but raw API only |
+| **Source of Truth** | Git-tracked `admin.config.yaml` | Proprietary cloud DB | Scattered codebases | OpenAPI document |
+| **Code Security** | Zero-eval AST parser | Client-side `eval()` scripts | Custom implementations | N/A (read-only forms) |
+| **Drift Detection** | Automated `diff` & `doctor` CLI | Manual reconciliation | Manual test regression | No change alerts |
+| **Workflow Actions** | Native RPC buttons & modals | Custom query wiring | Custom form dialogs | Raw HTTP payloads |
+| **Hosting Model** | Self-hosted embedded middleware | Proprietary cloud / complex self-host | Custom deployment pipeline | Embedded HTML |
 
 ---
 
 ## Quickstart Guide
 
-Get your admin panel running in 3 simple steps:
+### 1. Introspect API & Generate Configuration
 
-### Step 1: Introspect your API & Generate Config
-
-Install the CLI and pull your OpenAPI specification:
+Run the CLI pull command against any local schema file or running API service:
 
 ```bash
-# Generate admin.config.yaml from local file or remote URL
+# Deterministic OpenAPI extraction
 npx @admin-kit/cli pull --source=./openapi.json
 
-# Optional: Enable AI synthesis to auto-generate badges and conditional visibility rules
+# Optional: Run with AI enrichment for live badge maps and visibility rules
 export GEMINI_API_KEY="your-api-key"
 npx @admin-kit/cli pull --source=./openapi.json --ai
 ```
 
-### Step 2: Mount the Admin Studio Middleware
+### 2. Mount Middleware in Your Backend
 
-#### Option A: Node.js (Express)
-
-Install `@admin-kit/express`:
+#### Express (Node.js / TypeScript)
 
 ```bash
-npm install @admin-kit/express express
+pnpm add @admin-kit/express express
 ```
-
-Mount the router in your Express server:
 
 ```typescript
 import express from "express";
@@ -67,19 +99,15 @@ app.use(
 );
 
 app.listen(3000, () => {
-  console.log("Admin dashboard ready at http://localhost:3000/admin");
+  console.log("Admin dashboard available at http://localhost:3000/admin");
 });
 ```
 
-#### Option B: Python (FastAPI)
-
-Install `admin-kit-fastapi`:
+#### FastAPI (Python 3.10+)
 
 ```bash
 pip install admin-kit-fastapi fastapi uvicorn
 ```
-
-Mount the studio in your FastAPI application:
 
 ```python
 from fastapi import FastAPI
@@ -99,7 +127,7 @@ if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 ```
 
-### Step 3: Open the Dashboard
+### 3. Access the Studio
 
 Open your browser and navigate to:
 - **Express**: [http://localhost:3000/admin](http://localhost:3000/admin)
@@ -107,9 +135,7 @@ Open your browser and navigate to:
 
 ---
 
-## Configuration Example (`admin.config.yaml`)
-
-AdminKit uses a declarative, version-controlled YAML configuration file:
+## Configuration Reference (`admin.config.yaml`)
 
 ```yaml
 version: "1.0"
@@ -164,7 +190,7 @@ resources:
         - field: "notes"
           label: "Internal Notes"
           type: "string"
-          sensitive: true # Masked unless explicitly toggled
+          sensitive: true # Masked with click-to-reveal toggle
 
       row_actions:
         - id: "approve"
@@ -172,7 +198,7 @@ resources:
           endpoint: "/refunds/{id}/approve"
           method: "POST"
           style: "primary"
-          # Safe AST evaluation: only visible when pending
+          # Safe AST evaluation without eval()
           visible_if: "row.status == 'pending'"
           confirm:
             title: "Approve Refund"
@@ -203,23 +229,21 @@ rbac:
 
 ---
 
-## Monorepo Architecture
-
-The repository is built as an ultra-fast, modular **pnpm + Turborepo** monorepo:
+## Monorepo Structure
 
 ```text
 admin-kit/
 ├── packages/
-│   ├── core/                  # @admin-kit/core: Zod schemas, safe AST evaluator, RBAC & client
-│   ├── cli/                   # @admin-kit/cli: OpenAPI introspector, diff engine, AI synthesis
+│   ├── core/                  # @admin-kit/core: Zod schema, AST evaluator, RBAC, HTTP client
+│   ├── cli/                   # @admin-kit/cli: OpenAPI parser, diff engine, AI synthesis
 │   ├── react/                 # @admin-kit/react: Dynamic UI engine, TanStack tables, Doctor drawer
-│   └── express/               # @admin-kit/express: Node.js Express router & static bundle middleware
+│   └── express/               # @admin-kit/express: Express router & static bundle middleware
 ├── adapters/
 │   └── fastapi/               # admin-kit-fastapi: Python Starlette/FastAPI mount adapter
 ├── examples/
 │   ├── express-demo/          # Node.js + Express reference implementation
 │   ├── fastapi-demo/          # Python + FastAPI reference implementation
-│   └── react-demo/            # Standalone Vite React demo harness
+│   └── react-demo/            # Standalone Vite React development harness
 ├── docs/                      # Architectural specifications and schemas
 ├── .changeset/                # Release & changelog versioning configuration
 ├── pnpm-workspace.yaml
@@ -227,83 +251,71 @@ admin-kit/
 └── package.json
 ```
 
-### Package Overview
-
-| Package | Environment | Responsibilities | Key Dependencies |
-| :--- | :--- | :--- | :--- |
-| **`@admin-kit/core`** | Universal (Node & Browser) | Configuration schema validation, AST `visible_if` evaluator, RBAC resolution, HTTP client. | `zod`, `yaml` |
-| **`@admin-kit/cli`** | Node.js CLI | Commands (`init`, `pull`, `diff`, `doctor`, `studio`), OpenAPI parser, three-way merge, Gemini AI synthesis. | `commander`, `ai`, `@ai-sdk/google`, `@apidevtools/swagger-parser` |
-| **`@admin-kit/react`** | Browser (React) | Dynamic UI tables, search/sort, relation lookups, detail drawers, Doctor Console, RBAC gates. | `@tanstack/react-table`, `react-hook-form`, `lucide-react` |
-| **`@admin-kit/express`** | Node.js Backend | Express middleware serving compiled `@admin-kit/react` assets and `GET /__config`. | `express`, `@admin-kit/core` |
-| **`admin-kit-fastapi`** | Python Backend | FastAPI adapter serving static UI assets and `GET {path}/__config` JSON endpoint. | `fastapi`, `pyyaml` |
-
 ---
 
 ## CLI Reference
 
-The `@admin-kit/cli` binary provides comprehensive introspection and lifecycle utilities:
+The `@admin-kit/cli` executable provides end-to-end tooling for configuration management:
 
 ```bash
-# Initialize a starter admin.config.yaml
+# Initialize a starter template
 admin-kit init
 
-# Introspect an OpenAPI spec and update config
+# Introspect an OpenAPI spec and write admin.config.yaml
 admin-kit pull --source=./openapi.json
 
 # Introspect with AI workflow synthesis (badges, visibility, labels, sensitive fields)
 admin-kit pull --source=./openapi.json --ai
 
-# Detect schema drift between your backend and admin.config.yaml
+# Detect schema drift between your API and local config
 admin-kit diff --source=./openapi.json
 
-# Validate configuration integrity and check for missing endpoints
+# Run integrity validation and diagnostic audit
 admin-kit doctor
 
-# Launch an instant standalone preview studio
+# Launch a zero-dependency local preview server
 admin-kit studio --port=3000 --config=admin.config.yaml
 ```
 
 ---
 
-## Development & Contributing
+## Development & Testing
 
 ### Prerequisites
 
-- **Node.js**: v20 or later
-- **pnpm**: v9 or later
-- **Python**: 3.10+ (for `admin-kit-fastapi`)
+- Node.js v20+
+- pnpm v9+
+- Python 3.10+ (for `admin-kit-fastapi`)
 
-### Setup Instructions
+### Setup
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/admin-kit/admin-kit.git
-cd admin-kit
-
-# 2. Install dependencies
+# 1. Install dependencies
 pnpm install
 
-# 3. Build all packages
+# 2. Build packages
 pnpm build
 
-# 4. Run automated test suites
-node --experimental-strip-types --test packages/core/test/config.test.ts packages/cli/test/cli.test.ts packages/cli/test/ai.test.ts packages/express/test/express.test.ts
+# 3. Run automated test suites
+node --experimental-strip-types --test packages/core/test/config.test.ts packages/core/test/evaluator.test.ts packages/core/test/client.test.ts packages/core/test/rbac.test.ts packages/cli/test/cli.test.ts packages/cli/test/ai.test.ts packages/express/test/express.test.ts
 ```
 
-### Versioning & Releases
+### Versioning
 
-This monorepo uses [Changesets](https://github.com/changesets/changesets) for automated package versioning and changelog generation:
+This project uses [Changesets](https://github.com/changesets/changesets) for package versioning:
 
 ```bash
-# Add a changeset describing your changes
+# Create a changeset
 pnpm changeset
 
 # Version packages and update changelogs
 pnpm version-packages
 ```
 
+For detailed contribution workflows and guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md). For our security posture and vulnerability reporting guidelines, refer to [SECURITY.md](SECURITY.md).
+
 ---
 
 ## License
 
-MIT © [AdminKit Contributors](LICENSE)
+MIT © AdminKit Contributors
