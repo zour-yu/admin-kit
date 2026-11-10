@@ -28,6 +28,7 @@ export type ColumnType = z.infer<typeof ColumnTypeSchema>;
 const BaseTableColumnSchema = z.object({
   key: z.string().min(1, "Column key is required"),
   label: z.string().min(1, "Column label is required"),
+  primary_key: z.boolean().optional(),
   sortable: z.boolean().default(false),
   copyable: z.boolean().default(false),
   sensitive: z.boolean().default(false),

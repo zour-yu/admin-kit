@@ -39,7 +39,7 @@ export type ConfirmDialog = z.infer<typeof ConfirmDialogSchema>;
  */
 export const ActionApiSchema = z.object({
   endpoint: z.string().min(1, "Action endpoint is required"),
-  method: z.enum(["POST", "PUT", "PATCH", "DELETE"]).default("POST"),
+  method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]).default("POST"),
 });
 export type ActionApi = z.infer<typeof ActionApiSchema>;
 

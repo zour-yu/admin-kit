@@ -201,7 +201,7 @@ export class AdminClient {
     const response = await this.fetchFn(fullUrl, {
       method,
       headers,
-      body: payload ? JSON.stringify(payload) : undefined,
+      body: method !== "GET" && payload ? JSON.stringify(payload) : undefined,
     });
 
     if (!response.ok) {

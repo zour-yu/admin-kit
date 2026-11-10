@@ -300,4 +300,45 @@ describe("AdminKit Core Configuration Schema", () => {
     assert.equal(res.success, false);
     assert.ok(res.error instanceof Error);
   });
+
+  it("accepts GET action method, detail_endpoint on resource, and primary_key on TableColumn", () => {
+    const testConfig = {
+      version: "1.0",
+      project: { name: "Test API" },
+      resources: {
+        cases: {
+          label: "Cases",
+          endpoint: "/cases",
+          detail_endpoint: "/cases/{id}",
+          primary_key: "id",
+          table: {
+            columns: [
+              {
+                key: "id",
+                label: "ID",
+                type: "string",
+                primary_key: true,
+              },
+            ],
+          },
+          actions: [
+            {
+              name: "export_report",
+              label: "Export Report",
+              scope: "global",
+              api: {
+                endpoint: "/cases/export",
+                method: "GET",
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    const parsed = parseConfig(testConfig);
+    assert.equal(parsed.resources.cases.detail_endpoint, "/cases/{id}");
+    assert.equal(parsed.resources.cases.table?.columns[0].primary_key, true);
+    assert.equal(parsed.resources.cases.actions?.[0].api.method, "GET");
+  });
 });

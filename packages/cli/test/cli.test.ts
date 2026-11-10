@@ -158,4 +158,117 @@ describe("@admin-kit-yu/cli OpenAPI Introspection", () => {
       server.close();
     }
   });
+
+  it("handles real-world specs: filters out GET actions, identifies detail_endpoint, and generates fallback columns for empty schemas", async () => {
+    const tempSpecPath = path.resolve(repoRoot, "mocks/temp-realworld-spec.json");
+    const specContent = {
+      openapi: "3.0.0",
+      info: { title: "Real World API", version: "1.0.0" },
+      paths: {
+        "/cases": {
+          get: {
+            summary: "List cases",
+            responses: {
+              "200": {
+                description: "OK",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {}, // empty DTO properties
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "/cases/{id}": {
+          get: {
+            summary: "Get case by id",
+            responses: { "200": { description: "OK" } },
+          },
+        },
+        "/cases/metrics": {
+          get: {
+            summary: "Case metrics",
+            responses: { "200": { description: "OK" } },
+          },
+        },
+        "/cases/investigators": {
+          get: {
+            summary: "Investigators list",
+            responses: { "200": { description: "OK" } },
+          },
+        },
+        "/cases/{id}/escalate": {
+          post: {
+            summary: "Escalate case",
+            responses: { "200": { description: "Case escalated" } },
+          },
+        },
+        "/cases/{id}/status": {
+          put: {
+            summary: "Update status",
+            responses: { "200": { description: "Status updated" } },
+          },
+        },
+      },
+    };
+
+    fs.writeFileSync(tempSpecPath, JSON.stringify(specContent, null, 2), "utf-8");
+
+    try {
+      const result = await introspectOpenApi({
+        source: tempSpecPath,
+        baseUrl: "/api",
+      });
+
+      assert.ok(result);
+      const casesResource = result.config.resources.cases;
+      assert.ok(casesResource);
+
+      // Verify detail_endpoint was set and not an action
+      assert.equal(casesResource.detail_endpoint, "/cases/{id}");
+
+      // Verify auxiliary GET endpoints (/metrics, /investigators) are NOT actions
+      const actionNames = (casesResource.actions || []).map((a) => a.name);
+      assert.ok(!actionNames.includes("metrics"), "GET /cases/metrics must not become an action");
+      assert.ok(!actionNames.includes("investigators"), "GET /cases/investigators must not become an action");
+      assert.ok(!actionNames.includes("id"), "GET /cases/{id} must not become an action");
+
+      // Verify POST /cases/{id}/escalate and PUT /cases/{id}/status are the actions
+      assert.equal(actionNames.length, 2);
+      assert.deepEqual(actionNames.sort(), ["escalate", "status"]);
+      const escalateAct = casesResource.actions?.find((a) => a.name === "escalate");
+      assert.equal(escalateAct?.api.method, "POST");
+      const statusAct = casesResource.actions?.find((a) => a.name === "status");
+      assert.equal(statusAct?.api.method, "PUT");
+
+      // Verify fallback columns for empty schema
+      const cols = casesResource.table?.columns || [];
+      assert.ok(cols.length >= 3, "Expected fallback columns for empty schema");
+
+      const idCol = cols.find((c) => c.key === "id");
+      assert.ok(idCol, "id column must exist");
+      assert.equal(idCol.primary_key, true);
+
+      const statusCol = cols.find((c) => c.key === "status");
+      assert.ok(statusCol, "status badge column must exist due to /status endpoint");
+      assert.equal(statusCol?.type, "badge");
+
+      const createdCol = cols.find((c) => c.key === "created_at");
+      assert.ok(createdCol, "created_at column must exist");
+
+      const updatedCol = cols.find((c) => c.key === "updated_at");
+      assert.ok(updatedCol, "updated_at column must exist");
+    } finally {
+      if (fs.existsSync(tempSpecPath)) {
+        fs.unlinkSync(tempSpecPath);
+      }
+    }
+  });
 });

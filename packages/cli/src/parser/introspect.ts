@@ -104,6 +104,12 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
     );
     const baseEndpoint = collectionEp ? collectionEp.path : `/${resourceKey}`;
 
+    // Find item detail endpoint (e.g. GET /refunds/{id})
+    const getDetail = endpoints.find(
+      (e) => e.method === "GET" && isItemDetailPath(e.strippedPath, resourceKey)
+    );
+    const detailEndpoint = getDetail ? getDetail.path : undefined;
+
     // 3.1: Table definition from GET collection
     const getCollection = endpoints.find(
       (e) => e.method === "GET" && isCollectionPath(e.strippedPath, resourceKey)
@@ -116,9 +122,18 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
 
     if (getCollection) {
       const responseSchema = getResponseSchema(getCollection.op);
-      const itemSchema = extractItemSchema(responseSchema);
+      let itemSchema = extractItemSchema(responseSchema);
 
-      if (itemSchema && itemSchema.properties) {
+      // If GET collection has no discoverable properties, fallback to GET item detail endpoint schema
+      if ((!itemSchema || !itemSchema.properties || Object.keys(itemSchema.properties).length === 0) && getDetail) {
+        const detailResponseSchema = getResponseSchema(getDetail.op);
+        const detailItemSchema = extractItemSchema(detailResponseSchema);
+        if (detailItemSchema && detailItemSchema.properties && Object.keys(detailItemSchema.properties).length > 0) {
+          itemSchema = detailItemSchema;
+        }
+      }
+
+      if (itemSchema && itemSchema.properties && Object.keys(itemSchema.properties).length > 0) {
         for (const [propKey, propSchema] of Object.entries<any>(itemSchema.properties)) {
           const { type, relation, badge_map } = inferColumnType(propKey, propSchema, allResourceKeys);
 
@@ -141,6 +156,7 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
           }
 
           const colLabel = toTitleCase(propKey);
+          const isPrimaryKey = propKey === "id";
           const isCopyable = propKey === "id" || propKey.endsWith("_id") || propKey.endsWith("Id");
           const isSortable = type === "currency" || type === "number" || type === "date" || type === "datetime";
           const isSensitive = isSensitiveField(propKey);
@@ -149,6 +165,7 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
             key: propKey,
             label: colLabel,
             type,
+            primary_key: isPrimaryKey ? true : undefined,
             sortable: isSortable,
             copyable: isCopyable,
             sensitive: isSensitive,
@@ -184,17 +201,76 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
       }
     }
 
-    // Fallback if no columns discovered
+    // Fallback if no columns discovered (e.g. empty schemas, omitted responses, or properties: {})
     if (columns.length === 0) {
       columns.push({
         key: "id",
         label: "ID",
         type: "string",
+        primary_key: true,
         sortable: false,
         copyable: true,
         sensitive: false,
         hidden_by_default: false,
       });
+
+      // Check if status endpoints or status-related actions exist
+      const hasStatusEndpoints = endpoints.some((e) => {
+        const verb = extractActionVerb(e.strippedPath, resourceKey);
+        return (
+          e.strippedPath.toLowerCase().includes("status") ||
+          ["approve", "reject", "cancel", "close", "reopen", "archive", "publish"].includes(
+            (verb || "").toLowerCase()
+          )
+        );
+      });
+
+      if (hasStatusEndpoints || hasStatusField) {
+        columns.push({
+          key: "status",
+          label: "Status",
+          type: "badge",
+          badge_map: {
+            pending: "yellow",
+            active: "green",
+            approved: "green",
+            rejected: "red",
+            closed: "gray",
+          },
+          sortable: false,
+          copyable: false,
+          sensitive: false,
+          hidden_by_default: false,
+        });
+        if (!filterableFields.includes("status")) {
+          filterableFields.push("status");
+        }
+      }
+
+      columns.push(
+        {
+          key: "created_at",
+          label: "Created At",
+          type: "string",
+          sortable: true,
+          copyable: false,
+          sensitive: false,
+          hidden_by_default: false,
+        },
+        {
+          key: "updated_at",
+          label: "Updated At",
+          type: "string",
+          sortable: true,
+          copyable: false,
+          sensitive: false,
+          hidden_by_default: false,
+        }
+      );
+
+      if (searchableFields.length === 0) {
+        searchableFields.push("id");
+      }
     }
 
     totalColumns += columns.length;
@@ -251,6 +327,20 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
     const actions: ActionConfig[] = [];
 
     for (const ep of endpoints) {
+      // 1. Do NOT create an action for any HTTP GET endpoint!
+      // Auxiliary GET endpoints (e.g. /cases/metrics, /cases/investigators, /complaints/pending, /auth/me)
+      // must NOT be classified as row/resource actions.
+      if (ep.method === "GET") continue;
+
+      // 2. Only endpoints with POST, PUT, PATCH, or DELETE can become actions
+      if (!["POST", "PUT", "PATCH", "DELETE"].includes(ep.method)) continue;
+
+      // 3. Routes ending with .../{id} are item detail or standard CRUD mutation routes, not actions
+      if (isItemDetailPath(ep.strippedPath, resourceKey)) continue;
+
+      // 4. Collection base routes (e.g. POST /refunds) are collection create mutations, not actions
+      if (isCollectionPath(ep.strippedPath, resourceKey)) continue;
+
       const actionVerb = extractActionVerb(ep.strippedPath, resourceKey);
       if (!actionVerb) continue;
 
@@ -305,6 +395,7 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
     resources[resourceKey] = {
       label: resourceLabel,
       endpoint: baseEndpoint,
+      detail_endpoint: detailEndpoint,
       primary_key: "id",
       table: {
         page_size: 20,
@@ -383,6 +474,16 @@ function isItemPath(strippedPath: string, resourceKey: string): boolean {
     segments[1].startsWith("{") &&
     segments[1].endsWith("}")
   );
+}
+
+/**
+ * Checks if a stripped path represents an item detail route ending in a parameter like {id}.
+ */
+function isItemDetailPath(strippedPath: string, resourceKey: string): boolean {
+  const segments = strippedPath.split("/").filter(Boolean);
+  if (toSnakeCase(segments[0]) !== resourceKey) return false;
+  const last = segments[segments.length - 1];
+  return Boolean(last && last.startsWith("{") && last.endsWith("}"));
 }
 
 /**

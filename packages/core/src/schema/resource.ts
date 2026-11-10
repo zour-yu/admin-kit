@@ -11,6 +11,7 @@ export const ResourceConfigSchema = z.object({
   label: z.string().min(1, "Resource label is required"),
   icon: z.string().optional(),
   endpoint: z.string().min(1, "Resource endpoint is required"),
+  detail_endpoint: z.string().optional(),
   primary_key: z.string().default("id"),
   access: AccessRuleSchema.optional(),
   table: TableConfigSchema.optional(),

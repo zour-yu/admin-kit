@@ -51,6 +51,9 @@ export function mergeConfigs(
     if (newRes.endpoint && !existingRes.endpoint) {
       existingRes.endpoint = newRes.endpoint;
     }
+    if (newRes.detail_endpoint && !existingRes.detail_endpoint) {
+      existingRes.detail_endpoint = newRes.detail_endpoint;
+    }
 
     // Merge columns
     if (newRes.table?.columns) {
