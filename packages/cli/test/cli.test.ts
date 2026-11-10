@@ -2,7 +2,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
-import { introspectOpenApi } from "../dist/index.js";
+import {
+  introspectOpenApi,
+  computeConfigDiff,
+  runDoctorValidation,
+  startStudioServer,
+} from "../dist/index.js";
 import { parseConfig, parseYamlConfig } from "@admin-kit/core";
 
 const repoRoot = fs.existsSync(path.resolve(process.cwd(), "mocks/dummy-openapi.json"))
@@ -109,5 +114,48 @@ describe("@admin-kit/cli OpenAPI Introspection", () => {
     assert.equal(parsed.version, "1.0");
     assert.ok(parsed.resources.users);
     assert.ok(parsed.resources.refunds);
+  });
+
+  it("diffs admin.config.yaml against dummy-openapi.json and verifies inSync state", async () => {
+    const configPath = path.resolve(repoRoot, "admin.config.yaml");
+    const specPath = path.resolve(repoRoot, "mocks/dummy-openapi.json");
+    const diff = await computeConfigDiff(configPath, specPath);
+
+    assert.ok(diff);
+    assert.equal(diff.hasBreakingChanges, false, "Diff should not detect breaking changes against source spec");
+    assert.equal(diff.summary.removedResources, 0);
+  });
+
+  it("runs doctor validation on admin.config.yaml and confirms all checks pass", async () => {
+    const configPath = path.resolve(repoRoot, "admin.config.yaml");
+    const { passed, results } = await runDoctorValidation(configPath);
+
+    assert.equal(passed, true, "Doctor validation must pass for valid config");
+    assert.ok(results.length >= 3, "Doctor should run multiple structural checks");
+    const schemaCheck = results.find((r) => r.name === "Zod Schema Validation");
+    assert.ok(schemaCheck && schemaCheck.status === "pass");
+  });
+
+  it("launches the studio server and verifies /admin and /admin/__config", async () => {
+    const configPath = path.resolve(repoRoot, "admin.config.yaml");
+    const { server, port } = await startStudioServer({
+      config: configPath,
+      port: 0, // dynamic unallocated port
+      watch: false,
+    });
+
+    try {
+      const resHtml = await fetch(`http://127.0.0.1:${port}/admin`);
+      assert.equal(resHtml.status, 200);
+      const html = await resHtml.text();
+      assert.ok(html.includes('<div id="root">'));
+
+      const resConfig = await fetch(`http://127.0.0.1:${port}/admin/__config`);
+      assert.equal(resConfig.status, 200);
+      const configJson = await resConfig.json();
+      assert.equal(configJson.project.name, "Acme API");
+    } finally {
+      server.close();
+    }
   });
 });

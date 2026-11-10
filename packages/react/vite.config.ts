@@ -4,6 +4,9 @@ import dts from "vite-plugin-dts";
 import path from "node:path";
 
 export default defineConfig({
+  resolve: {
+    preserveSymlinks: true,
+  },
   plugins: [
     react(),
     dts({

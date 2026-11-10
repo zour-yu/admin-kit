@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useConfig } from "../../context/ConfigContext";
 import { DynamicDataTable } from "../table/DynamicDataTable";
 import { ActionExecutionModal } from "../modals/ActionExecutionModal";
+import { RecordDetailDrawer } from "../drawer/RecordDetailDrawer";
+import { DoctorConsoleDrawer } from "../drawer/DoctorConsoleDrawer";
 import type { ActionConfig } from "@admin-kit/core";
 import {
   Sun,
@@ -13,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
+  Activity,
 } from "lucide-react";
 
 export interface AppShellProps {
@@ -59,6 +62,12 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
     setTheme,
     toast,
     showToast,
+    simulatedRole,
+    setSimulatedRole,
+    checkAccess,
+    isSuperadmin,
+    isDoctorOpen,
+    setIsDoctorOpen,
   } = useConfig();
 
   // Internal reactive dataset supporting real-time mutations & actions
@@ -69,12 +78,29 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
   const [activeRow, setActiveRow] = useState<any | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
 
+  // Record Detail Drawer state
+  const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
+  const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
+
   // Sync external data changes
   useEffect(() => {
     if (data) {
       setLocalData(data);
     }
   }, [data]);
+
+  // Pre-calculate diagnostic issue count across schema definitions
+  const diagnosticCount = useMemo(() => {
+    if (!config?.resources) return 0;
+    let count = 0;
+    for (const res of Object.values(config.resources)) {
+      if (!res.endpoint || !res.endpoint.startsWith("/")) count++;
+      for (const act of res.actions || []) {
+        if (!act.api?.endpoint) count++;
+      }
+    }
+    return count;
+  }, [config]);
 
   if (!config) {
     return (
@@ -93,6 +119,16 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
   }
 
   const resourceKeys = Object.keys(config.resources || {});
+
+  // RBAC Filtering for Navigation Sidebar
+  const permittedResourceKeys = resourceKeys.filter((key) => {
+    const res = config.resources[key];
+    if (res.access) {
+      return checkAccess(res.access);
+    }
+    return true;
+  });
+
   const activeResourceData = localData[activeResourceKey] ?? getInitialSampleData(activeResourceKey);
 
   /**
@@ -150,10 +186,26 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
         });
         return { ...prev, [activeResourceKey]: updatedList };
       });
+
+      // Also update selectedRecord if detail drawer is open
+      if (selectedRecord && selectedRecord[pKey] === row[pKey]) {
+        setSelectedRecord((prev: any) => {
+          if (!prev) return prev;
+          const updated = { ...prev, ...payload };
+          if (action.name.toLowerCase().includes("approve")) updated.status = "approved";
+          if (action.name.toLowerCase().includes("reject")) updated.status = "rejected";
+          return updated;
+        });
+      }
     }
 
     const toastMsg = action.on_success?.toast || `${action.label} completed successfully.`;
     showToast(toastMsg);
+  };
+
+  const handleRowClick = (row: any) => {
+    setSelectedRecord(row);
+    setIsDetailDrawerOpen(true);
   };
 
   const getResourceIcon = (key: string, customIcon?: string) => {
@@ -183,7 +235,7 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
 
         <nav className="ak-sidebar-nav">
           <div className="ak-nav-section-title">Resources</div>
-          {resourceKeys.map((key) => {
+          {permittedResourceKeys.map((key) => {
             const res = config.resources[key];
             const isActive = key === activeResourceKey;
             return (
@@ -200,10 +252,16 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
           })}
         </nav>
 
-        <div className="ak-sidebar-footer">
+        {/* Sidebar Footer with Simulated RBAC Role Pill */}
+        <div
+          className="ak-sidebar-footer"
+          onClick={() => setIsDoctorOpen(true)}
+          style={{ cursor: "pointer" }}
+          title="Click to open RBAC Role Simulator & Doctor Console"
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#94a3b8" }}>
-            <ShieldCheck size={16} style={{ color: "#22c55e" }} />
-            <span>RBAC: Superadmin</span>
+            <ShieldCheck size={16} style={{ color: isSuperadmin ? "#22c55e" : "var(--ak-primary)" }} />
+            <span>RBAC: <strong style={{ color: "#f8fafc" }}>{simulatedRole.toUpperCase()}</strong></span>
           </div>
         </div>
       </aside>
@@ -221,10 +279,16 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
           </div>
 
           <div className="ak-header-actions">
-            {/* Doctor Diagnostic Badge */}
-            <div className="ak-doctor-badge" title="Doctor Console: All schemas in sync">
-              <span className="ak-doctor-dot" />
-              <span>Doctor: Healthy</span>
+            {/* Interactive Doctor Diagnostic Badge */}
+            <div
+              className="ak-doctor-badge"
+              onClick={() => setIsDoctorOpen(true)}
+              style={{ cursor: "pointer" }}
+              title="Click to inspect schema drift, missing badges/routes, and simulate roles"
+            >
+              <Activity size={14} className={diagnosticCount > 0 ? "ak-doctor-pulse-icon" : ""} style={{ color: diagnosticCount > 0 ? "#eab308" : "#22c55e" }} />
+              <span className="ak-doctor-dot" style={{ backgroundColor: diagnosticCount > 0 ? "#eab308" : "#22c55e" }} />
+              <span>Doctor: {diagnosticCount === 0 ? "Healthy" : `${diagnosticCount} Issues`}</span>
             </div>
 
             {/* Light / Dark Mode Switcher */}
@@ -253,12 +317,13 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
                 </div>
               </div>
 
-              {/* Dynamic TanStack Data Table */}
+              {/* Dynamic TanStack Data Table with RBAC and Row Click */}
               <DynamicDataTable
                 resource={activeResource}
                 data={activeResourceData}
                 onExecuteAction={handleActionClick}
                 onNavigateRelation={(targetKey) => setActiveResourceKey(targetKey)}
+                onSelectRow={handleRowClick}
               />
             </>
           ) : (
@@ -285,6 +350,33 @@ export const AppShell: React.FC<AppShellProps> = ({ data, onExecuteAction }) => 
         }}
         onExecute={executeAction}
         primaryKey={activeResource?.primary_key || "id"}
+      />
+
+      {/* Record Detail Drawer */}
+      <RecordDetailDrawer
+        resource={activeResource}
+        record={selectedRecord}
+        isOpen={isDetailDrawerOpen}
+        onClose={() => {
+          setIsDetailDrawerOpen(false);
+          setSelectedRecord(null);
+        }}
+        onExecuteAction={handleActionClick}
+        onNavigateRelation={(targetKey) => {
+          setIsDetailDrawerOpen(false);
+          setActiveResourceKey(targetKey);
+        }}
+      />
+
+      {/* In-App Diagnostic Doctor Console & RBAC Simulator Drawer */}
+      <DoctorConsoleDrawer
+        isOpen={isDoctorOpen}
+        onClose={() => setIsDoctorOpen(false)}
+        config={config}
+        activeResourceKey={activeResourceKey}
+        data={localData}
+        simulatedRole={simulatedRole}
+        onSelectSimulatedRole={setSimulatedRole}
       />
 
       {/* Notification Toast */}

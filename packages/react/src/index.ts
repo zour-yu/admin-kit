@@ -37,5 +37,29 @@ export {
   type ActionExecutionModalProps,
 } from "./components/modals/ActionExecutionModal";
 
+export {
+  MutationFormModal,
+  type MutationFormModalProps,
+  type MutationMode,
+} from "./components/modals/MutationFormModal";
+
+// Drawers
+export {
+  RecordDetailDrawer,
+  type RecordDetailDrawerProps,
+} from "./components/drawer/RecordDetailDrawer";
+
+export {
+  DoctorConsoleDrawer,
+  type DoctorConsoleDrawerProps,
+  type DiagnosticIssue,
+} from "./components/drawer/DoctorConsoleDrawer";
+
+// Auth & RBAC components
+export {
+  RBACGuard,
+  type RBACGuardProps,
+} from "./components/auth/RBACGuard";
+
 // Styles
 import "./styles/admin-studio.css";

@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import {
   parseConfig,
   parseYamlConfig,
   type AdminKitConfig,
   type ResourceConfig,
+  type AccessRule,
 } from "@admin-kit/core";
 
 export interface ConfigContextValue {
@@ -17,6 +18,16 @@ export interface ConfigContextValue {
   error: Error | null;
   toast: string | null;
   showToast: (msg: string) => void;
+
+  // RBAC & Role Simulation
+  simulatedRole: string;
+  setSimulatedRole: (role: string) => void;
+  checkAccess: (access?: AccessRule | { roles?: string[]; permissions?: string[] }) => boolean;
+  isSuperadmin: boolean;
+
+  // In-App Diagnostic Doctor
+  isDoctorOpen: boolean;
+  setIsDoctorOpen: (open: boolean) => void;
 }
 
 const ConfigContext = createContext<ConfigContextValue | undefined>(undefined);
@@ -26,6 +37,7 @@ export interface ConfigProviderProps {
   config?: AdminKitConfig | string;
   configUrl?: string;
   initialResourceKey?: string;
+  initialRole?: string;
 }
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = ({
@@ -33,6 +45,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
   config: initialConfig,
   configUrl,
   initialResourceKey,
+  initialRole,
 }) => {
   const [config, setConfig] = useState<AdminKitConfig | null>(() => {
     if (!initialConfig) return null;
@@ -52,6 +65,21 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [toast, setToast] = useState<string | null>(null);
 
+  // RBAC Simulation state
+  const [simulatedRole, setSimulatedRole] = useState<string>(
+    initialRole || config?.access?.superadmin_roles?.[0] || "superadmin"
+  );
+
+  // Doctor Drawer open state
+  const [isDoctorOpen, setIsDoctorOpen] = useState(false);
+
+  // Sync default simulated role when config loads
+  useEffect(() => {
+    if (!initialRole && config?.access?.superadmin_roles?.[0]) {
+      setSimulatedRole((prev) => prev || config.access!.superadmin_roles![0]);
+    }
+  }, [config, initialRole]);
+
   // Sync theme attribute with document body
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -61,7 +89,8 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
   useEffect(() => {
     if (initialConfig) {
       try {
-        const parsed = typeof initialConfig === "string" ? parseYamlConfig(initialConfig) : parseConfig(initialConfig);
+        const parsed =
+          typeof initialConfig === "string" ? parseYamlConfig(initialConfig) : parseConfig(initialConfig);
         setConfig(parsed);
         setIsLoading(false);
       } catch (err: any) {
@@ -80,7 +109,12 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch config from ${configUrl}`);
         const contentType = res.headers.get("content-type") || "";
-        if (contentType.includes("yaml") || contentType.includes("yml") || configUrl.endsWith(".yaml") || configUrl.endsWith(".yml")) {
+        if (
+          contentType.includes("yaml") ||
+          contentType.includes("yml") ||
+          configUrl.endsWith(".yaml") ||
+          configUrl.endsWith(".yml")
+        ) {
           return res.text().then((text) => parseYamlConfig(text));
         }
         return res.json().then((json) => parseConfig(json));
@@ -130,6 +164,41 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
     }, 3500);
   };
 
+  const superadminRoles = useMemo(() => {
+    return config?.access?.superadmin_roles || ["superadmin"];
+  }, [config]);
+
+  const isSuperadmin = useMemo(() => {
+    return superadminRoles.includes(simulatedRole);
+  }, [superadminRoles, simulatedRole]);
+
+  /**
+   * Evaluates if the current simulated user has access to a protected resource, action, or column.
+   */
+  const checkAccess = useCallback(
+    (access?: AccessRule | { roles?: string[]; permissions?: string[] }): boolean => {
+      // Superadmins bypass all presentation gates
+      if (isSuperadmin) {
+        return true;
+      }
+
+      // If no access restrictions exist, grant presentation access
+      if (!access || (!access.roles?.length && !access.permissions?.length)) {
+        return true;
+      }
+
+      // Role check: simulated role must be explicitly allowed
+      if (access.roles && access.roles.length > 0) {
+        if (!access.roles.includes(simulatedRole)) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+    [isSuperadmin, simulatedRole]
+  );
+
   const value: ConfigContextValue = {
     config,
     activeResourceKey,
@@ -141,6 +210,12 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
     error,
     toast,
     showToast,
+    simulatedRole,
+    setSimulatedRole,
+    checkAccess,
+    isSuperadmin,
+    isDoctorOpen,
+    setIsDoctorOpen,
   };
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

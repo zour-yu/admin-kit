@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { stringify as stringifyYaml } from "yaml";
-import type { AdminKitConfig } from "@admin-kit/core";
+import { stringify as stringifyYaml, parse as parseYaml } from "yaml";
+import { parseYamlConfig, type AdminKitConfig } from "@admin-kit/core";
 
 /**
  * Ensures that .gitignore in the target directory contains the specified pattern.
@@ -65,4 +65,16 @@ export function writeConfigFile(outputPath: string, config: AdminKitConfig): voi
   });
 
   fs.writeFileSync(outputPath, yamlContent, "utf-8");
+}
+
+/**
+ * Reads and parses an AdminKitConfig from a YAML file path.
+ */
+export function readConfigFile(configPath: string): AdminKitConfig {
+  const resolved = path.resolve(process.cwd(), configPath);
+  if (!fs.existsSync(resolved)) {
+    throw new Error(`Configuration file not found: ${resolved}`);
+  }
+  const content = fs.readFileSync(resolved, "utf-8");
+  return parseYamlConfig(content);
 }

@@ -3,6 +3,9 @@
 import { Command } from "commander";
 import { registerInitCommand } from "./commands/init";
 import { registerPullCommand } from "./commands/pull";
+import { registerDiffCommand } from "./commands/diff";
+import { registerDoctorCommand } from "./commands/doctor";
+import { registerStudioCommand } from "./commands/studio";
 
 const program = new Command();
 
@@ -14,11 +17,19 @@ program
 // Register commands
 registerInitCommand(program);
 registerPullCommand(program);
+registerDiffCommand(program);
+registerDoctorCommand(program);
+registerStudioCommand(program);
 
 // Export commands and parser for programmatic use as well
 export * from "./parser/introspect";
 export * from "./parser/heuristics";
 export * from "./parser/types";
+export { mergeConfigs, type MergeResult } from "./parser/merge";
+export { computeConfigDiff } from "./commands/diff";
+export { runDoctorValidation } from "./commands/doctor";
+export { startStudioServer } from "./commands/studio";
+export { synthesizeAiEnrichment, deepMergeAiEnrichment } from "./ai/synthesis";
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";

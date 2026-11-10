@@ -9,6 +9,8 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import type { ResourceConfig, ActionConfig } from "@admin-kit/core";
+import { evaluateExpression } from "@admin-kit/core";
+import { useConfig } from "../../context/ConfigContext";
 import { CellRenderer } from "./CellRenderer";
 import {
   ArrowUpDown,
@@ -25,6 +27,7 @@ export interface DynamicDataTableProps {
   data?: any[];
   onExecuteAction?: (action: ActionConfig, row: any) => void;
   onNavigateRelation?: (targetResource: string, recordId: string) => void;
+  onSelectRow?: (row: any) => void;
 }
 
 export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
@@ -32,9 +35,21 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
   data: customData,
   onExecuteAction,
   onNavigateRelation,
+  onSelectRow,
 }) => {
+  const { checkAccess, simulatedRole } = useConfig();
   const tableConfig = resource.table;
-  const columnsConfig = useMemo(() => tableConfig?.columns || [], [tableConfig]);
+  const rawColumnsConfig = useMemo(() => tableConfig?.columns || [], [tableConfig]);
+
+  // RBAC Filter: Only include columns the active simulated role is permitted to see
+  const permittedColumnsConfig = useMemo(() => {
+    return rawColumnsConfig.filter((col) => {
+      if (col.access) {
+        return checkAccess(col.access);
+      }
+      return true;
+    });
+  }, [rawColumnsConfig, checkAccess]);
 
   // Generate realistic sample records if no live data is passed
   const fallbackData = useMemo(() => {
@@ -60,7 +75,7 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
 
   // Define TanStack Table Column Definitions
   const columns = useMemo<ColumnDef<any>[]>(() => {
-    const cols: ColumnDef<any>[] = columnsConfig.map((col) => ({
+    const cols: ColumnDef<any>[] = permittedColumnsConfig.map((col) => ({
       id: col.key,
       accessorKey: col.key,
       header: col.label,
@@ -85,8 +100,16 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
         cell: (info) => {
           const row = info.row.original;
           const permittedActions = rowActions.filter((action) => {
+            // 1. RBAC Presentation Gate Check
+            if (action.access && !checkAccess(action.access)) {
+              return false;
+            }
+            // 2. Visible-If Data Evaluation
             if (action.visible_if) {
-              return evaluateVisibleIf(action.visible_if, row);
+              return evaluateExpression(action.visible_if, {
+                row,
+                user: { role: simulatedRole, roles: [simulatedRole] },
+              });
             }
             return true;
           });
@@ -102,7 +125,10 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
                   key={action.name}
                   type="button"
                   className={`ak-btn ak-btn-${action.style || "secondary"}`}
-                  onClick={() => onExecuteAction && onExecuteAction(action, row)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onExecuteAction) onExecuteAction(action, row);
+                  }}
                 >
                   {action.label}
                 </button>
@@ -114,7 +140,7 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
     }
 
     return cols;
-  }, [columnsConfig, resource.actions, onExecuteAction, onNavigateRelation]);
+  }, [permittedColumnsConfig, resource.actions, onExecuteAction, onNavigateRelation, checkAccess]);
 
   // Filtered rows matching selected filter dropdown
   const filteredData = useMemo(() => {
@@ -256,7 +282,11 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
           <tbody>
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
+                <tr
+                  key={row.id}
+                  onClick={() => onSelectRow && onSelectRow(row.original)}
+                  style={{ cursor: onSelectRow ? "pointer" : undefined }}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id}>
                       {cell.column.columnDef.cell
@@ -325,24 +355,6 @@ export const DynamicDataTable: React.FC<DynamicDataTableProps> = ({
     </div>
   );
 };
-
-/**
- * Basic safe visible_if evaluator supporting expressions like `row.status == 'pending'`.
- */
-function evaluateVisibleIf(expression: string, row: Record<string, any>): boolean {
-  try {
-    const match = expression.match(/row\.(\w+)\s*(===?|!==?)\s*['"]([^'"]+)['"]/);
-    if (match) {
-      const [, field, op, targetVal] = match;
-      const actualVal = String(row[field]);
-      if (op.startsWith("==")) return actualVal === targetVal;
-      if (op.startsWith("!=")) return actualVal !== targetVal;
-    }
-    return true;
-  } catch {
-    return true;
-  }
-}
 
 /**
  * Generates realistic sample data for immediate studio preview based on resource schema.

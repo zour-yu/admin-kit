@@ -145,9 +145,11 @@ export function mountAdminStudio(options: MountAdminStudioOptions = {}): Router 
     }
   });
 
-  // 3. Static Assets: /__assets/*
+  // 3. Static Assets: /__assets/* and general static files
   if (fs.existsSync(assetsDir)) {
     router.use("/__assets", express.static(assetsDir, { maxAge: "1d" }));
+    // Disable automatic index.html serving so the SPA catch-all handler can inject configuration
+    router.use(express.static(assetsDir, { maxAge: "1d", index: false }));
 
     // Direct asset aliases
     router.get("/style.css", (_req: Request, res: Response) => {
@@ -179,10 +181,13 @@ export function mountAdminStudio(options: MountAdminStudioOptions = {}): Router 
     const customHtmlPath = path.join(assetsDir, "index.html");
     if (fs.existsSync(customHtmlPath)) {
       let customHtml = fs.readFileSync(customHtmlPath, "utf-8");
+      const title = options.title || currentConfig?.project?.name || "AdminKit Studio";
+      customHtml = customHtml.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
+      const configJsonStr = currentConfig ? JSON.stringify(currentConfig).replace(/</g, "\\u003c") : "null";
       // Inject base tag and config endpoint if needed
       customHtml = customHtml.replace(
         "<head>",
-        `<head>\n  <base href="${normalizedBasePath}/">\n  <script>window.__ADMIN_KIT_CONFIG_URL__ = "${normalizedBasePath}/__config";</script>`
+        `<head>\n  <base href="${normalizedBasePath}/">\n  <script>window.__ADMIN_KIT_CONFIG_URL__ = "${normalizedBasePath}/__config"; window.__ADMIN_KIT_INITIAL_CONFIG__ = ${configJsonStr};</script>`
       );
       res.type("html").send(customHtml);
       return;

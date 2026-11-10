@@ -12,7 +12,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/style.css"
+    "./styles.css": "./dist/style.css",
+    "./style.css": "./dist/style.css",
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
@@ -20,6 +23,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node -e \"const fs=require('fs'); const path=require('path'); const src=path.resolve('../../examples/react-demo/dist'); const dst=path.resolve('dist'); if(fs.existsSync(src)) fs.cpSync(src, dst, { recursive: true, force: true });\"",
     "lint": "tsc --noEmit",
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
