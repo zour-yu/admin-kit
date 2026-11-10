@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { Command } from "commander";
 import express from "express";
-import { mountAdminStudio } from "@admin-kit/express";
+import { mountAdminStudio } from "@admin-kit-yu/express";
 
 export interface StudioOptions {
   config?: string;

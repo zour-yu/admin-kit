@@ -2,7 +2,7 @@ import type {
   ColumnType,
   FormField,
   ActionStyle,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 import { toSnakeCase, toTitleCase, pluralize } from "../utils/formatting";
 
 const CURRENCY_KEYWORDS = ["amount", "price", "cost", "balance", "total", "fee", "subtotal", "salary", "wage"];

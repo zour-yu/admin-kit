@@ -2,9 +2,9 @@
 
 ## 1. Overview
 `admin.config.yaml` is the declarative contract for `admin-kit`. It bridges the backend API and the generated Admin UI:
-* **CLI (`@admin-kit/cli`):** Introspects OpenAPI specs and generates this file.
-* **Core (`@admin-kit/core`):** Validates this file at runtime.
-* **UI (`@admin-kit/react`):** Reads this file to render tables, forms, workflow modals, and RBAC rules.
+* **CLI (`@admin-kit-yu/cli`):** Introspects OpenAPI specs and generates this file.
+* **Core (`@admin-kit-yu/core`):** Validates this file at runtime.
+* **UI (`@admin-kit-yu/react`):** Reads this file to render tables, forms, workflow modals, and RBAC rules.
 
 ---
 

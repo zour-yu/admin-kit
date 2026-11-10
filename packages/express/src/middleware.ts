@@ -8,7 +8,7 @@ import {
   parseYamlConfig,
   formatConfigErrorDetails,
   type AdminKitConfig,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 import { renderStudioHtml } from "./html";
 import type { MountAdminStudioOptions } from "./types";
 
@@ -33,12 +33,12 @@ function findWorkspaceRoot(): string {
 }
 
 /**
- * Resolves the location of @admin-kit/react static dist assets.
+ * Resolves the location of @admin-kit-yu/react static dist assets.
  */
 function resolveDefaultAssetsDir(): string {
   try {
     const require = createRequire(import.meta.url);
-    const reactPkgJson = require.resolve("@admin-kit/react/package.json");
+    const reactPkgJson = require.resolve("@admin-kit-yu/react/package.json");
     const distPath = path.resolve(path.dirname(reactPkgJson), "dist");
     if (fs.existsSync(distPath)) {
       return distPath;
@@ -52,7 +52,7 @@ function resolveDefaultAssetsDir(): string {
   // Fallback for monorepo workspace layouts
   const fallbackCandidates = [
     path.resolve(workspaceRoot, "packages/react/dist"),
-    path.resolve(workspaceRoot, "node_modules/@admin-kit/react/dist"),
+    path.resolve(workspaceRoot, "node_modules/@admin-kit-yu/react/dist"),
     path.resolve(__dirname, "../../react/dist"),
     path.resolve(__dirname, "../../../react/dist"),
   ];
@@ -71,7 +71,7 @@ function resolveDefaultAssetsDir(): string {
  *
  * Implements the delivery model specified in docs/ARCHITECTURE.md:
  * - Exposes `GET /__config` returning validated AdminKitConfig JSON.
- * - Serves static bundle assets from `@admin-kit/react/dist`.
+ * - Serves static bundle assets from `@admin-kit-yu/react/dist`.
  * - Serves the SPA HTML shell on any subpath (e.g. `/admin/*`).
  */
 export function mountAdminStudio(options: MountAdminStudioOptions = {}): Router {

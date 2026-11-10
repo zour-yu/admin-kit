@@ -1,4 +1,4 @@
-import type { AdminKitConfig, ResourceConfig } from "@admin-kit/core";
+import type { AdminKitConfig, ResourceConfig } from "@admin-kit-yu/core";
 
 export interface MergeResult {
   mergedConfig: AdminKitConfig;

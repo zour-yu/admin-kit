@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { TableColumn } from "@admin-kit/core";
+import type { TableColumn } from "@admin-kit-yu/core";
 import { Copy, Check, Eye, EyeOff, ExternalLink } from "lucide-react";
 
 export interface CellRendererProps {

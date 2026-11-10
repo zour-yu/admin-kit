@@ -1,6 +1,6 @@
 {
-  "name": "@admin-kit/core",
-  "version": "0.1.0",
+  "name": "@admin-kit-yu/core",
+  "version": "0.2.0",
   "description": "Core configuration schemas, types, and validators for AdminKit",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,6 +14,9 @@
     "./package.json": "./package.json"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { stringify as stringifyYaml, parse as parseYaml } from "yaml";
-import { parseYamlConfig, type AdminKitConfig } from "@admin-kit/core";
+import { parseYamlConfig, type AdminKitConfig } from "@admin-kit-yu/core";
 
 /**
  * Ensures that .gitignore in the target directory contains the specified pattern.

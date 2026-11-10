@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { generateObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import type { AdminKitConfig } from "@admin-kit/core";
+import type { AdminKitConfig } from "@admin-kit-yu/core";
 
 export const BadgeColorSchema = z.enum(["gray", "red", "yellow", "green", "blue", "purple"]);
 

@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { Command } from "commander";
-import { AdminKitConfigSchema, type AdminKitConfig } from "@admin-kit/core";
+import { AdminKitConfigSchema, type AdminKitConfig } from "@admin-kit-yu/core";
 import { ensureGitignoreContains, writeConfigFile } from "../utils/fs";
 
 export interface InitOptions {
@@ -23,7 +23,7 @@ export function registerInitCommand(program: Command): void {
 
         if (fs.existsSync(outputPath)) {
           console.log(`[admin-kit] Existing configuration found at: ${outputPath}`);
-          console.log(`[admin-kit] To re-introspect endpoints, run: npx @admin-kit/cli pull --source <spec>`);
+          console.log(`[admin-kit] To re-introspect endpoints, run: npx @admin-kit-yu/cli pull --source <spec>`);
           return;
         }
 
@@ -59,7 +59,7 @@ export function registerInitCommand(program: Command): void {
         console.log(`[admin-kit] Config written to: ${outputPath}`);
         console.log(`[admin-kit] Added .admin-kit/ to .gitignore`);
         console.log(`[admin-kit] Next step: Pull endpoints from your OpenAPI spec:`);
-        console.log(`  npx @admin-kit/cli pull --source <url_or_filepath>`);
+        console.log(`  npx @admin-kit-yu/cli pull --source <url_or_filepath>`);
       } catch (err: any) {
         console.error(`[admin-kit] Error initializing AdminKit:`, err.message || err);
         process.exit(1);

@@ -1,5 +1,5 @@
 import React from "react";
-import type { AccessRule } from "@admin-kit/core";
+import type { AccessRule } from "@admin-kit-yu/core";
 import { useConfig } from "../../context/ConfigContext";
 
 export interface RBACGuardProps {

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import type { AdminKitConfig } from "@admin-kit/core";
+import type { AdminKitConfig } from "@admin-kit-yu/core";
 
 export interface MountAdminStudioOptions {
   /**
@@ -15,8 +15,8 @@ export interface MountAdminStudioOptions {
   config?: AdminKitConfig | string;
 
   /**
-   * Custom path where @admin-kit/react precompiled static files are stored.
-   * If omitted, automatically resolves from @admin-kit/react/dist.
+   * Custom path where @admin-kit-yu/react precompiled static files are stored.
+   * If omitted, automatically resolves from @admin-kit-yu/react/dist.
    */
   assetsDir?: string;
 

@@ -47,8 +47,8 @@ export function renderStudioHtml({
       "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
       "react-dom": "https://esm.sh/react-dom@18.3.1",
       "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "@admin-kit/core": "${safeAssetPrefix}/index.js",
-      "@admin-kit/react": "${safeAssetPrefix}/index.js"
+      "@admin-kit-yu/core": "${safeAssetPrefix}/index.js",
+      "@admin-kit-yu/react": "${safeAssetPrefix}/index.js"
     }
   }
   </script>
@@ -67,7 +67,7 @@ export function renderStudioHtml({
   <script type="module">
     import React from "react";
     import { createRoot } from "react-dom/client";
-    import { AdminStudio } from "@admin-kit/react";
+    import { AdminStudio } from "@admin-kit-yu/react";
 
     window.__ADMIN_KIT_CONFIG_URL__ = "${safeConfigUrl}";
     ${initialConfigJson ? `window.__ADMIN_KIT_INITIAL_CONFIG__ = ${initialConfigJson};` : ""}

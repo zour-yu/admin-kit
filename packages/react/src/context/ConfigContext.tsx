@@ -5,7 +5,7 @@ import {
   type AdminKitConfig,
   type ResourceConfig,
   type AccessRule,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 
 export interface ConfigContextValue {
   config: AdminKitConfig | null;

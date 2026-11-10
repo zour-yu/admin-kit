@@ -1,10 +1,12 @@
 {
-  "name": "@admin-kit/cli",
-  "version": "0.1.0",
+  "name": "@admin-kit-yu/cli",
+  "version": "0.2.0",
   "description": "CLI tool for AdminKit OpenAPI introspection and configuration management",
   "type": "module",
   "bin": {
-    "admin-kit": "./dist/index.js"
+    "admin-kit": "./bin/admin-kit.js",
+    "admin-kit-yu": "./bin/admin-kit.js",
+    "cli": "./bin/admin-kit.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -17,8 +19,12 @@
     },
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "scripts": {
     "build": "tsup",
@@ -28,8 +34,8 @@
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@admin-kit/core": "workspace:*",
-    "@admin-kit/express": "workspace:*",
+    "@admin-kit-yu/core": "workspace:*",
+    "@admin-kit-yu/express": "workspace:*",
     "@ai-sdk/google": "^4.0.114",
     "@apidevtools/swagger-parser": "^10.1.0",
     "ai": "^7.0.166",

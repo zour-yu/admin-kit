@@ -52,7 +52,7 @@ function getWorkspaceRoot(): string {
   return process.cwd();
 }
 
-describe("@admin-kit/express: mountAdminStudio", () => {
+describe("@admin-kit-yu/express: mountAdminStudio", () => {
   it("creates an express router that serves /__config with valid parsed JSON", async () => {
     const app = express();
     const router = mountAdminStudio({

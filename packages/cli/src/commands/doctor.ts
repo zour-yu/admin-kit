@@ -5,7 +5,7 @@ import {
   safeParseYamlConfig,
   formatConfigErrorDetails,
   type AdminKitConfig,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 
 export interface DoctorOptions {
   config?: string;

@@ -8,8 +8,8 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import type { ResourceConfig, ActionConfig } from "@admin-kit/core";
-import { evaluateExpression } from "@admin-kit/core";
+import type { ResourceConfig, ActionConfig } from "@admin-kit-yu/core";
+import { evaluateExpression } from "@admin-kit-yu/core";
 import { useConfig } from "../../context/ConfigContext";
 import { CellRenderer } from "./CellRenderer";
 import {

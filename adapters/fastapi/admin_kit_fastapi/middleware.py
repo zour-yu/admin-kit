@@ -20,14 +20,14 @@ def find_workspace_root() -> Path:
 
 
 def resolve_default_assets_dir() -> Path:
-    """Resolves the pre-compiled @admin-kit/react static dist directory."""
+    """Resolves the pre-compiled @admin-kit-yu/react static dist directory."""
     workspace_root = find_workspace_root()
 
     candidates = [
         Path.cwd() / "dist",
         Path.cwd().parent / "packages" / "react" / "dist",
         workspace_root / "packages" / "react" / "dist",
-        workspace_root / "node_modules" / "@admin-kit" / "react" / "dist",
+        workspace_root / "node_modules" / "@admin-kit-yu" / "react" / "dist",
         Path(__file__).resolve().parent.parent.parent.parent / "packages" / "react" / "dist",
     ]
 
@@ -71,7 +71,7 @@ def mount_admin_studio(
         app: Target FastAPI instance.
         path: Route prefix where AdminKit should be mounted (e.g. '/admin').
         config_path: Path to admin.config.yaml file.
-        assets_dir: Optional custom path to @admin-kit/react/dist assets directory.
+        assets_dir: Optional custom path to @admin-kit-yu/react/dist assets directory.
         title: Optional custom browser title override.
     """
     normalized_path = "/" + path.strip("/")
@@ -126,7 +126,7 @@ def mount_admin_studio(
   <body>
     <div style="font-family:sans-serif;padding:32px;text-align:center;">
       <h2>AdminKit Studio assets not found</h2>
-      <p>Ensure @admin-kit/react is built in {resolved_assets_dir}</p>
+      <p>Ensure @admin-kit-yu/react is built in {resolved_assets_dir}</p>
     </div>
   </body>
 </html>"""

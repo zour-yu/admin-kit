@@ -12,10 +12,10 @@ body:
       label: Affected Package
       description: Which package or adapter did this issue occur in?
       options:
-        - "@admin-kit/core"
-        - "@admin-kit/cli"
-        - "@admin-kit/react"
-        - "@admin-kit/express"
+        - "@admin-kit-yu/core"
+        - "@admin-kit-yu/cli"
+        - "@admin-kit-yu/react"
+        - "@admin-kit-yu/express"
         - "admin-kit-fastapi"
         - "other / workspace"
     validations:
@@ -40,7 +40,7 @@ body:
       label: Reproduction Steps
       description: Detailed steps to reproduce the behavior, or a link to a minimal repository.
       placeholder: |
-        1. Run `npx @admin-kit/cli pull --source=...`
+        1. Run `npx @admin-kit-yu/cli pull --source=...`
         2. Mount Express middleware at `/admin`
         3. Observe error...
     validations:

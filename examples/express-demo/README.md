@@ -1,9 +1,9 @@
-# Express Demo (@admin-kit/express)
+# Express Demo (@admin-kit-yu/express)
 
 This example demonstrates the complete embedded backend middleware model for AdminKit using Express.
 
 ## Overview
-* Mounts `@admin-kit/express` under `/admin`.
+* Mounts `@admin-kit-yu/express` under `/admin`.
 * Exposes `GET /admin/__config` returning validated declarative configuration from `admin.config.yaml`.
 * Serves the pre-compiled SPA dashboard at `http://localhost:3000/admin`.
 * Provides mock REST endpoints matching `mocks/dummy-openapi.json`:

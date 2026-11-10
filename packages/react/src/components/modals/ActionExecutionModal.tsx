@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { ActionConfig } from "@admin-kit/core";
+import type { ActionConfig } from "@admin-kit-yu/core";
 import { DynamicForm } from "../form/DynamicForm";
 import { X, AlertTriangle, CheckCircle, Info, Loader2 } from "lucide-react";
 

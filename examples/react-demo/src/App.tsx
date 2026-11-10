@@ -1,6 +1,5 @@
-import React from "react";
-import { AdminStudio } from "@admin-kit/react";
-import "@admin-kit/react/styles.css";
+import { AdminStudio } from "@admin-kit-yu/react";
+import "@admin-kit-yu/react/styles.css";
 import adminConfigYaml from "./admin.config.yaml?raw";
 
 export function App() {

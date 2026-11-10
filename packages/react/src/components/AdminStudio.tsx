@@ -1,5 +1,5 @@
 import React from "react";
-import type { AdminKitConfig, ActionConfig } from "@admin-kit/core";
+import type { AdminKitConfig, ActionConfig } from "@admin-kit-yu/core";
 import { ConfigProvider } from "../context/ConfigContext";
 import { AppShell } from "./layout/AppShell";
 import "../styles/admin-studio.css";

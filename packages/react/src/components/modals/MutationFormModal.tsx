@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { ResourceConfig, FormField } from "@admin-kit/core";
+import type { ResourceConfig, FormField } from "@admin-kit-yu/core";
 import { DynamicForm } from "../form/DynamicForm";
 import { X, PlusCircle, Edit3, Trash2, Loader2, AlertTriangle } from "lucide-react";
 

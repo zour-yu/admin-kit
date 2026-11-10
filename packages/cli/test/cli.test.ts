@@ -8,13 +8,13 @@ import {
   runDoctorValidation,
   startStudioServer,
 } from "../dist/index.js";
-import { parseConfig, parseYamlConfig } from "@admin-kit/core";
+import { parseConfig, parseYamlConfig } from "@admin-kit-yu/core";
 
 const repoRoot = fs.existsSync(path.resolve(process.cwd(), "mocks/dummy-openapi.json"))
   ? process.cwd()
   : path.resolve(process.cwd(), "../..");
 
-describe("@admin-kit/cli OpenAPI Introspection", () => {
+describe("@admin-kit-yu/cli OpenAPI Introspection", () => {
   it("introspects mocks/dummy-openapi.json and produces a valid AdminKitConfig", async () => {
     const dummyPath = path.resolve(repoRoot, "mocks/dummy-openapi.json");
     const result = await introspectOpenApi({

@@ -27,7 +27,7 @@ AdminKit inspects any OpenAPI 3.0/3.1 backend specification, synthesizes a decla
 ```mermaid
 flowchart LR
     subgraph BuildTime["1. Build Time (CLI)"]
-        Spec["OpenAPI 3.0/3.1 Spec"] --> CLI["@admin-kit/cli"]
+        Spec["OpenAPI 3.0/3.1 Spec"] --> CLI["@admin-kit-yu/cli"]
         Gemini["Gemini AI Engine"] -.->|Heuristics & Badges| CLI
         CLI --> Config["admin.config.yaml"]
     end
@@ -38,7 +38,7 @@ flowchart LR
     end
 
     subgraph Client["3. Client-Side Presentation"]
-        Server --> SPA["@admin-kit/react Studio"]
+        Server --> SPA["@admin-kit-yu/react Studio"]
         SPA --> AST["Safe AST Evaluator (visible_if)"]
         SPA --> RBAC["RBAC Permission Gate"]
         SPA --> Doctor["Doctor Diagnostic Drawer"]
@@ -68,11 +68,11 @@ Run the CLI pull command against any local schema file or running API service:
 
 ```bash
 # Deterministic OpenAPI extraction
-npx @admin-kit/cli pull --source=./openapi.json
+npx @admin-kit-yu/cli pull --source=./openapi.json
 
 # Optional: Run with AI enrichment for live badge maps and visibility rules
 export GEMINI_API_KEY="your-api-key"
-npx @admin-kit/cli pull --source=./openapi.json --ai
+npx @admin-kit-yu/cli pull --source=./openapi.json --ai
 ```
 
 ### 2. Mount Middleware in Your Backend
@@ -80,12 +80,12 @@ npx @admin-kit/cli pull --source=./openapi.json --ai
 #### Express (Node.js / TypeScript)
 
 ```bash
-pnpm add @admin-kit/express express
+pnpm add @admin-kit-yu/express express
 ```
 
 ```typescript
 import express from "express";
-import { mountAdminStudio } from "@admin-kit/express";
+import { mountAdminStudio } from "@admin-kit-yu/express";
 
 const app = express();
 app.use(express.json());
@@ -234,10 +234,10 @@ rbac:
 ```text
 admin-kit/
 ├── packages/
-│   ├── core/                  # @admin-kit/core: Zod schema, AST evaluator, RBAC, HTTP client
-│   ├── cli/                   # @admin-kit/cli: OpenAPI parser, diff engine, AI synthesis
-│   ├── react/                 # @admin-kit/react: Dynamic UI engine, TanStack tables, Doctor drawer
-│   └── express/               # @admin-kit/express: Express router & static bundle middleware
+│   ├── core/                  # @admin-kit-yu/core: Zod schema, AST evaluator, RBAC, HTTP client
+│   ├── cli/                   # @admin-kit-yu/cli: OpenAPI parser, diff engine, AI synthesis
+│   ├── react/                 # @admin-kit-yu/react: Dynamic UI engine, TanStack tables, Doctor drawer
+│   └── express/               # @admin-kit-yu/express: Express router & static bundle middleware
 ├── adapters/
 │   └── fastapi/               # admin-kit-fastapi: Python Starlette/FastAPI mount adapter
 ├── examples/
@@ -255,7 +255,7 @@ admin-kit/
 
 ## CLI Reference
 
-The `@admin-kit/cli` executable provides end-to-end tooling for configuration management:
+The `@admin-kit-yu/cli` executable provides end-to-end tooling for configuration management:
 
 ```bash
 # Initialize a starter template

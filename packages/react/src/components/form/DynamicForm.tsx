@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm, type SubmitHandler, type FieldValues } from "react-hook-form";
-import type { FormField, FormFieldOption } from "@admin-kit/core";
+import type { FormField, FormFieldOption } from "@admin-kit-yu/core";
 import { Loader2 } from "lucide-react";
 
 export interface DynamicFormProps {

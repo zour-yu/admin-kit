@@ -1,9 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { deepMergeAiEnrichment, type AiEnrichmentPayload } from "../dist/index.js";
-import type { AdminKitConfig } from "@admin-kit/core";
+import type { AdminKitConfig } from "@admin-kit-yu/core";
 
-describe("@admin-kit/cli AI Synthesis & Deep Merge", () => {
+describe("@admin-kit-yu/cli AI Synthesis & Deep Merge", () => {
   const baseConfig: AdminKitConfig = {
     version: "1.0",
     project: {

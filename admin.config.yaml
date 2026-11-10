@@ -17,53 +17,6 @@ access:
   superadmin_roles:
     - superadmin
 resources:
-  users:
-    label: Users
-    endpoint: /users
-    primary_key: id
-    table:
-      page_size: 20
-      searchable_fields:
-        - email
-      filterable_fields:
-        - role
-      columns:
-        - key: id
-          label: ID
-          type: string
-          sortable: false
-          copyable: true
-          sensitive: false
-          hidden_by_default: false
-        - key: email
-          label: Email
-          type: string
-          sortable: false
-          copyable: false
-          sensitive: false
-          hidden_by_default: false
-        - key: role
-          label: Role
-          type: badge
-          sortable: false
-          copyable: false
-          sensitive: false
-          hidden_by_default: false
-          badge_map:
-            user: blue
-            admin: purple
-        - key: created_at
-          label: Created At
-          type: datetime
-          sortable: true
-          copyable: false
-          sensitive: false
-          hidden_by_default: false
-    mutations:
-      creatable: false
-      editable: false
-      deletable: false
-    actions: []
   refunds:
     label: Refunds
     endpoint: /refunds
@@ -161,3 +114,50 @@ resources:
           toast: Refund rejected successfully.
           invalidate:
             - refunds
+  users:
+    label: Users
+    endpoint: /users
+    primary_key: id
+    table:
+      page_size: 20
+      searchable_fields:
+        - email
+      filterable_fields:
+        - role
+      columns:
+        - key: id
+          label: ID
+          type: string
+          sortable: false
+          copyable: true
+          sensitive: false
+          hidden_by_default: false
+        - key: email
+          label: Email
+          type: string
+          sortable: false
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+        - key: role
+          label: Role
+          type: badge
+          sortable: false
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+          badge_map:
+            user: blue
+            admin: purple
+        - key: created_at
+          label: Created At
+          type: datetime
+          sortable: true
+          copyable: false
+          sensitive: false
+          hidden_by_default: false
+    mutations:
+      creatable: false
+      editable: false
+      deletable: false
+    actions: []

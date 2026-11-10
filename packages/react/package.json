@@ -1,6 +1,6 @@
 {
-  "name": "@admin-kit/react",
-  "version": "0.1.0",
+  "name": "@admin-kit-yu/react",
+  "version": "0.2.0",
   "description": "Frontend UI engine for AdminKit providing dynamic data tables, forms, and diagnostic studio",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,6 +17,9 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
@@ -28,7 +31,7 @@
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@admin-kit/core": "workspace:*",
+    "@admin-kit-yu/core": "workspace:*",
     "@tanstack/react-table": "^8.16.0",
     "@tanstack/table-core": "^8.16.0",
     "lucide-react": "^0.378.0",

@@ -16,7 +16,7 @@
         "vite.config.*"
       ]
     },
-    "@admin-kit/core#build": {
+    "@admin-kit-yu/core#build": {
       "dependsOn": [
         "^build"
       ],
@@ -24,7 +24,7 @@
         "dist/**"
       ]
     },
-    "@admin-kit/cli#build": {
+    "@admin-kit-yu/cli#build": {
       "dependsOn": [
         "^build"
       ],
@@ -32,7 +32,7 @@
         "dist/**"
       ]
     },
-    "@admin-kit/react#build": {
+    "@admin-kit-yu/react#build": {
       "dependsOn": [
         "^build"
       ],
@@ -40,7 +40,7 @@
         "dist/**"
       ]
     },
-    "@admin-kit/express#build": {
+    "@admin-kit-yu/express#build": {
       "dependsOn": [
         "^build"
       ],

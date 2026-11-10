@@ -1,7 +1,7 @@
 # AdminKit UI Engine Specification (`UI_ENGINE_SPEC.md`)
 
 ## 1. Overview
-`@admin-kit/react` is the frontend rendering engine for `admin-kit`. It consumes a validated `admin.config.yaml` schema object, enforces role-based access control (RBAC) at the presentation layer, renders dynamic data tables, forms, and custom workflow modals, and provides an integrated diagnostic console (**Doctor**).
+`@admin-kit-yu/react` is the frontend rendering engine for `admin-kit`. It consumes a validated `admin.config.yaml` schema object, enforces role-based access control (RBAC) at the presentation layer, renders dynamic data tables, forms, and custom workflow modals, and provides an integrated diagnostic console (**Doctor**).
 
 ---
 

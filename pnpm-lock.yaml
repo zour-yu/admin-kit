@@ -20,10 +20,10 @@ importers:
 
   examples/express-demo:
     dependencies:
-      '@admin-kit/core':
+      '@admin-kit-yu/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@admin-kit/express':
+      '@admin-kit-yu/express':
         specifier: workspace:*
         version: link:../../packages/express
       express:
@@ -32,10 +32,10 @@ importers:
 
   examples/react-demo:
     dependencies:
-      '@admin-kit/core':
+      '@admin-kit-yu/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@admin-kit/react':
+      '@admin-kit-yu/react':
         specifier: workspace:*
         version: link:../../packages/react
       lucide-react:
@@ -72,10 +72,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@admin-kit/core':
+      '@admin-kit-yu/core':
         specifier: workspace:*
         version: link:../core
-      '@admin-kit/express':
+      '@admin-kit-yu/express':
         specifier: workspace:*
         version: link:../express
       '@ai-sdk/google':
@@ -140,10 +140,10 @@ importers:
 
   packages/express:
     dependencies:
-      '@admin-kit/core':
+      '@admin-kit-yu/core':
         specifier: workspace:*
         version: link:../core
-      '@admin-kit/react':
+      '@admin-kit-yu/react':
         specifier: workspace:*
         version: link:../react
       yaml:
@@ -174,7 +174,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@admin-kit/core':
+      '@admin-kit-yu/core':
         specifier: workspace:*
         version: link:../core
       '@tanstack/react-table':

@@ -18,7 +18,7 @@ AdminKit is designed for internal operational tooling, enterprise back-offices, 
    AdminKit supports dynamic row-action visibility rules (`visible_if`, e.g., `row.status == 'pending'`). These expressions are parsed through an AST recursive-descent token interpreter. Neither `eval()`, `new Function()`, nor external scripting runtimes are ever used, preventing arbitrary code execution vectors.
 
 2. **Self-Contained Local Static Asset Serving**:
-   The frontend single-page application is compiled into offline static assets served directly from local disk by `@admin-kit/express` and `admin-kit-fastapi`. There are zero runtime external CDN script tags, eliminating supply-chain tampering and enabling air-gapped corporate deployments.
+   The frontend single-page application is compiled into offline static assets served directly from local disk by `@admin-kit-yu/express` and `admin-kit-fastapi`. There are zero runtime external CDN script tags, eliminating supply-chain tampering and enabling air-gapped corporate deployments.
 
 3. **Sensitive Field Masking**:
    Schema fields marked with `sensitive: true` (e.g., API keys, tokens, PII) are masked by default in the UI and require explicit user click interaction to reveal.

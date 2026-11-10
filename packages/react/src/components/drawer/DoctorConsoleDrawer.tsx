@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import type { AdminKitConfig } from "@admin-kit/core";
+import type { AdminKitConfig } from "@admin-kit-yu/core";
 import {
   X,
   Shield,

@@ -1,6 +1,6 @@
 {
-  "name": "@admin-kit/express",
-  "version": "0.1.0",
+  "name": "@admin-kit-yu/express",
+  "version": "0.2.0",
   "description": "Express middleware for AdminKit providing SPA static assets and configuration metadata endpoints",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,6 +14,9 @@
     "./package.json": "./package.json"
   },
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
@@ -25,8 +28,8 @@
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@admin-kit/core": "workspace:*",
-    "@admin-kit/react": "workspace:*",
+    "@admin-kit-yu/core": "workspace:*",
+    "@admin-kit-yu/react": "workspace:*",
     "yaml": "^2.4.5"
   },
   "peerDependencies": {

@@ -1,0 +1,13 @@
+# @admin-kit-yu/cli
+
+## 0.2.0
+
+### Minor Changes
+
+- Initial release of AdminKit CLI and adapters
+
+### Patch Changes
+
+- Updated dependencies
+  - @admin-kit-yu/core@0.2.0
+  - @admin-kit-yu/express@0.2.0

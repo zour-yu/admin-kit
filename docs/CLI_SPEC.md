@@ -1,7 +1,7 @@
 # AdminKit CLI & Introspection Specification (`CLI_SPEC.md`)
 
 ## 1. Overview
-`@admin-kit/cli` is the command-line tool that bridges backend API specifications and the declarative `admin.config.yaml` schema. It inspects OpenAPI 3.0/3.1 documents, classifies endpoints into data tables and custom workflows, optionally enhances configurations using LLM inference, detects schema drift, and runs a local studio server.
+`@admin-kit-yu/cli` is the command-line tool that bridges backend API specifications and the declarative `admin.config.yaml` schema. It inspects OpenAPI 3.0/3.1 documents, classifies endpoints into data tables and custom workflows, optionally enhances configurations using LLM inference, detects schema drift, and runs a local studio server.
 
 ---
 
@@ -10,7 +10,7 @@
 ### 2.1 `init`
 Initializes `admin-kit` in the current repository by creating a starter `admin.config.yaml` and adding `.admin-kit/` to `.gitignore`.
 
-* **Usage:** `npx @admin-kit/cli init [options]`
+* **Usage:** `npx @admin-kit-yu/cli init [options]`
 * **Options:**
   * `--output <path>`: Path for the generated config file (default: `./admin.config.yaml`).
   * `--base-url <url>`: Default API base URL prefix (default: `"/api"`).
@@ -18,7 +18,7 @@ Initializes `admin-kit` in the current repository by creating a starter `admin.c
 ### 2.2 `pull`
 Introspects a live OpenAPI URL or local JSON/YAML spec file and generates or updates `admin.config.yaml`.
 
-* **Usage:** `npx @admin-kit/cli pull --source <url_or_path> [options]`
+* **Usage:** `npx @admin-kit-yu/cli pull --source <url_or_path> [options]`
 * **Options:**
   * `--source <string>` *(required)*: HTTP URL or local file path to the OpenAPI 3.0/3.1 specification.
   * `--output <path>`: Target configuration file path (default: `./admin.config.yaml`).
@@ -29,24 +29,24 @@ Introspects a live OpenAPI URL or local JSON/YAML spec file and generates or upd
 ### 2.3 `diff`
 Compares the current `admin.config.yaml` against an updated OpenAPI specification and outputs a report of added, modified, or broken endpoints without modifying the config file.
 
-* **Usage:** `npx @admin-kit/cli diff --source <url_or_path> [options]`
+* **Usage:** `npx @admin-kit-yu/cli diff --source <url_or_path> [options]`
 * **Options:**
   * `--source <string>` *(required)*: URL or file path to the latest OpenAPI spec.
   * `--config <path>`: Path to existing `admin.config.yaml` (default: `./admin.config.yaml`).
 * **Exit Codes:** Returns `0` if fully in sync, `1` if breaking drift (missing endpoints or missing required payload fields) is detected. Ideal for CI/CD pipelines.
 
 ### 2.4 `doctor`
-Validates the syntax of `admin.config.yaml` against `@admin-kit/core` and optionally pings the live backend to verify endpoint reachability.
+Validates the syntax of `admin.config.yaml` against `@admin-kit-yu/core` and optionally pings the live backend to verify endpoint reachability.
 
-* **Usage:** `npx @admin-kit/cli doctor [options]`
+* **Usage:** `npx @admin-kit-yu/cli doctor [options]`
 * **Options:**
   * `--config <path>`: Path to `admin.config.yaml` (default: `./admin.config.yaml`).
   * `--live <base_url>`: Base URL of the running backend to test endpoint reachability and CORS headers.
 
 ### 2.5 `studio`
-Spins up a standalone local web server serving `@admin-kit/react` bound to the local `admin.config.yaml`.
+Spins up a standalone local web server serving `@admin-kit-yu/react` bound to the local `admin.config.yaml`.
 
-* **Usage:** `npx @admin-kit/cli studio [options]`
+* **Usage:** `npx @admin-kit-yu/cli studio [options]`
 * **Options:**
   * `--config <path>`: Path to `admin.config.yaml` (default: `./admin.config.yaml`).
   * `--port <number>`: Local port to serve the UI (default: `3333`).
@@ -123,7 +123,7 @@ When `--ai` is enabled during `pull`, the CLI passes the deterministically parse
 
 ## 5. Three-Way Merge & Schema Drift Resolution
 
-Re-running `npx @admin-kit/cli pull` on an existing project must never overwrite manual developer customizations (such as custom RBAC roles, tweaked labels, or custom widget names).
+Re-running `npx @admin-kit-yu/cli pull` on an existing project must never overwrite manual developer customizations (such as custom RBAC roles, tweaked labels, or custom widget names).
 
 1. **Snapshot Storage:** Every successful `pull` saves a normalized hash of the OpenAPI spec inside `.admin-kit/snapshot.json`.
 2. **Merge Rules on Subsequent Pulls:**

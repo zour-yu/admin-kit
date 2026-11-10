@@ -1,7 +1,7 @@
 import type {
   AdminKitConfig,
   ResourceConfig,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 
 export interface ParsedEndpoint {
   originalPath: string;

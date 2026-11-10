@@ -1,6 +1,6 @@
 import React from "react";
-import type { ResourceConfig, ActionConfig } from "@admin-kit/core";
-import { evaluateExpression } from "@admin-kit/core";
+import type { ResourceConfig, ActionConfig } from "@admin-kit-yu/core";
+import { evaluateExpression } from "@admin-kit-yu/core";
 import { CellRenderer } from "../table/CellRenderer";
 import { X, Copy, Check, Code, Layers } from "lucide-react";
 

@@ -4,7 +4,7 @@ import { DynamicDataTable } from "../table/DynamicDataTable";
 import { ActionExecutionModal } from "../modals/ActionExecutionModal";
 import { RecordDetailDrawer } from "../drawer/RecordDetailDrawer";
 import { DoctorConsoleDrawer } from "../drawer/DoctorConsoleDrawer";
-import type { ActionConfig } from "@admin-kit/core";
+import type { ActionConfig } from "@admin-kit-yu/core";
 import {
   Sun,
   Moon,

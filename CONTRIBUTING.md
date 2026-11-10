@@ -8,10 +8,10 @@ Thank you for your interest in contributing to AdminKit! This document provides 
 
 AdminKit is organized as a pnpm workspace orchestrated by Turborepo:
 
-- **`packages/core`** (`@admin-kit/core`): Universal configuration schemas, AST recursive-descent expression evaluator, RBAC resolver, and HTTP client.
-- **`packages/cli`** (`@admin-kit/cli`): Introspection CLI, three-way merge engine, and AI synthesis.
-- **`packages/react`** (`@admin-kit/react`): Dynamic UI engine, TanStack tables, form builders, and diagnostic console.
-- **`packages/express`** (`@admin-kit/express`): Node.js Express middleware for runtime static asset and configuration delivery.
+- **`packages/core`** (`@admin-kit-yu/core`): Universal configuration schemas, AST recursive-descent expression evaluator, RBAC resolver, and HTTP client.
+- **`packages/cli`** (`@admin-kit-yu/cli`): Introspection CLI, three-way merge engine, and AI synthesis.
+- **`packages/react`** (`@admin-kit-yu/react`): Dynamic UI engine, TanStack tables, form builders, and diagnostic console.
+- **`packages/express`** (`@admin-kit-yu/express`): Node.js Express middleware for runtime static asset and configuration delivery.
 - **`adapters/fastapi`** (`admin-kit-fastapi`): Python FastAPI / Starlette adapter.
 - **`examples/`**: Reference implementations for Express and FastAPI.
 
@@ -74,7 +74,7 @@ Select the affected packages, choose the bump level (`patch`, `minor`, `major`),
 
 - **TypeScript**: Strict type checking enabled. Avoid `any` where possible.
 - **Security**: Never introduce `eval()`, `new Function()`, or dynamic code execution in evaluator or runtime code paths.
-- **Offline Delivery**: The `@admin-kit/react` bundle served by backend adapters must be self-contained and free of external runtime CDN dependencies.
+- **Offline Delivery**: The `@admin-kit-yu/react` bundle served by backend adapters must be self-contained and free of external runtime CDN dependencies.
 - **Non-Destructive Synchronization**: CLI operations must preserve user-customized labels, badge mappings, and visibility rules when merging upstream OpenAPI changes.
 
 ---

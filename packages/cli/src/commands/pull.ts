@@ -7,20 +7,23 @@ import { writeConfigFile, readConfigFile, saveSnapshot, ensureGitignoreContains 
 import { synthesizeAiEnrichment } from "../ai/synthesis";
 import { mergeConfigs } from "../parser/merge";
 
-// Automatically load .env from current directory or monorepo root
-function loadEnvironment(): void {
-  dotenv.config();
-  let curr = process.cwd();
+// Automatically load .env quietly from current directory or monorepo root
+export function loadEnvironment(): void {
+  const cwdEnv = path.resolve(process.cwd(), ".env");
+  if (fs.existsSync(cwdEnv)) {
+    dotenv.config({ path: cwdEnv, quiet: true });
+    return;
+  }
+  let curr = path.dirname(process.cwd());
   while (curr !== path.dirname(curr)) {
     const candidate = path.join(curr, ".env");
     if (fs.existsSync(candidate)) {
-      dotenv.config({ path: candidate });
+      dotenv.config({ path: candidate, quiet: true });
       return;
     }
     curr = path.dirname(curr);
   }
 }
-loadEnvironment();
 
 export interface PullOptions {
   source: string;
@@ -43,6 +46,13 @@ export function registerPullCommand(program: Command): void {
     .option("-f, --force", "Overwrite existing configuration completely")
     .action(async (options: PullOptions) => {
       try {
+        if (!options.source || !options.source.trim()) {
+          console.error("[admin-kit] Error: Missing required option -s, --source <path_or_url>");
+          process.exit(1);
+        }
+
+        loadEnvironment();
+
         console.log(`[admin-kit] Introspecting OpenAPI specification from: ${options.source}...`);
 
         const result = await introspectOpenApi({
@@ -50,12 +60,15 @@ export function registerPullCommand(program: Command): void {
           baseUrl: options.baseUrl,
         });
 
+        console.log(`[admin-kit] ✓ Parsed OpenAPI schema (${Object.keys(result.config.resources || {}).length} resources identified)`);
+
         let finalConfig = result.config;
 
         // Run AI synthesis layer if --ai flag is passed
         if (options.ai) {
           console.log(`[admin-kit] Running AI synthesis engine (--ai)...`);
           finalConfig = await synthesizeAiEnrichment(result.config);
+          console.log(`[admin-kit] ✓ AI synthesis completed`);
         }
 
         const outputPath = path.resolve(process.cwd(), options.output || "./admin.config.yaml");
@@ -88,6 +101,7 @@ export function registerPullCommand(program: Command): void {
 
         // Write config
         writeConfigFile(outputPath, finalConfig);
+        console.log(`[admin-kit] ✓ Successfully wrote ${path.basename(outputPath)}`);
 
         // Save snapshot for drift detection
         saveSnapshot(targetDir, finalConfig);

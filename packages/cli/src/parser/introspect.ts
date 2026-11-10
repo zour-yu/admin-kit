@@ -7,7 +7,7 @@ import {
   type TableColumn,
   type ActionConfig,
   type MutationsConfig,
-} from "@admin-kit/core";
+} from "@admin-kit-yu/core";
 import {
   stripApiPrefix,
   extractResourceKey,
@@ -350,7 +350,7 @@ export async function introspectOpenApi(options: IntrospectionOptions): Promise<
     resources,
   };
 
-  // Step 5: Strict validation against @admin-kit/core schema
+  // Step 5: Strict validation against @admin-kit-yu/core schema
   const validatedConfig: AdminKitConfig = AdminKitConfigSchema.parse(rawConfig);
 
   return {

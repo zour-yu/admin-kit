@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name("admin-kit")
   .description("AdminKit CLI - API-driven admin dashboard generator and OpenAPI introspector")
-  .version("0.1.0");
+  .version("0.2.0");
 
 // Register commands
 registerInitCommand(program);
@@ -32,15 +32,25 @@ export { startStudioServer } from "./commands/studio";
 export { synthesizeAiEnrichment, deepMergeAiEnrichment } from "./ai/synthesis";
 
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// Parse arguments only when invoked directly as CLI executable
-const isDirectRun =
-  Boolean(process.argv[1]) &&
-  (path.resolve(process.argv[1]) === fileURLToPath(import.meta.url) ||
-    path.basename(process.argv[1]).replace(/\.[cm]?[jt]s$/, "") === "admin-kit");
+// Parse arguments when invoked directly as CLI executable
+function isDirectRun(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    const scriptPath = fs.realpathSync(path.resolve(process.argv[1]));
+    const currentModulePath = fs.realpathSync(fileURLToPath(import.meta.url));
+    if (scriptPath === currentModulePath) return true;
+  } catch {
+    // ignore filesystem resolution errors
+  }
+  const base = path.basename(process.argv[1]).replace(/\.[cm]?[jt]s$/, "");
+  // Only parse if directly executing index.js, since bin/admin-kit.js calls program.parse() itself
+  return base === "index";
+}
 
-if (isDirectRun) {
+if (isDirectRun()) {
   program.parse(process.argv);
 }
 
