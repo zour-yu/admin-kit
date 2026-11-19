@@ -123,18 +123,39 @@ def mount_admin_studio(
 
     # 3. HTML Shell Builder Helper
     def build_studio_html() -> str:
+        try:
+            cfg = load_yaml_config(resolved_config_path)
+        except Exception:
+            cfg = current_config
+
+        studio_title = title or cfg.get("project", {}).get("name") or "AdminKit Studio"
+        config_json_str = json.dumps(cfg).replace("<", "\\u003c")
+
         html_file = resolved_assets_dir / "index.html"
         if not html_file.exists():
-            # Fallback simple HTML shell
+            # Standalone fallback HTML shell with full inlined config and mount point
             return f"""<!doctype html>
-<html>
+<html lang="en">
   <head>
-    <title>AdminKit Studio</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="{normalized_path}/">
+    <title>{studio_title}</title>
+    <link rel="stylesheet" href="{normalized_path}/__assets/style.css" />
+    <script>
+      window.__ADMIN_KIT_CONFIG_URL__ = "{normalized_path}/__config";
+      window.__ADMIN_KIT_INITIAL_CONFIG__ = {config_json_str};
+    </script>
   </head>
-  <body>
-    <div style="font-family:sans-serif;padding:32px;text-align:center;">
-      <h2>AdminKit Studio assets not found</h2>
-      <p>Ensure @admin-kit-yu/react is built in {resolved_assets_dir}</p>
+  <body style="margin: 0; padding: 0; background: #090d16; color: #f9fafb;">
+    <div id="root">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; height: 100vh; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 16px; font-size: 18px;">AK</div>
+          <h2 style="font-size: 18px; margin: 0 0 6px; font-weight: 600;">{studio_title}</h2>
+          <p style="font-size: 13px; color: #9ca3af; margin: 0;">Connected to {normalized_path}/__config</p>
+        </div>
+      </div>
     </div>
   </body>
 </html>"""
@@ -142,15 +163,8 @@ def mount_admin_studio(
         with open(html_file, "r", encoding="utf-8") as f:
             custom_html = f.read()
 
-        try:
-            cfg = load_yaml_config(resolved_config_path)
-        except Exception:
-            cfg = current_config
-
-        studio_title = title or cfg.get("project", {}).get("name") or "AdminKit Studio"
         custom_html = re.sub(r"<title>.*?</title>", f"<title>{studio_title}</title>", custom_html, flags=re.IGNORECASE)
 
-        config_json_str = json.dumps(cfg).replace("<", "\\u003c")
         injection = (
             f'<head>\n'
             f'  <base href="{normalized_path}/">\n'

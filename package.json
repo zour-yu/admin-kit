@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "test": "pnpm --filter admin-kit-yu test",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
