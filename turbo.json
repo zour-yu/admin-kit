@@ -10,42 +10,11 @@
       ],
       "inputs": [
         "src/**",
+        "studio/**",
         "package.json",
         "tsconfig*.json",
         "tsup.config.*",
         "vite.config.*"
-      ]
-    },
-    "@admin-kit-yu/core#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
-    },
-    "@admin-kit-yu/cli#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
-    },
-    "@admin-kit-yu/react#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
-    },
-    "@admin-kit-yu/express#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
       ]
     },
     "dev": {

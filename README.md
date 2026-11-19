@@ -27,18 +27,18 @@ AdminKit inspects any OpenAPI 3.0/3.1 backend specification, synthesizes a decla
 ```mermaid
 flowchart LR
     subgraph BuildTime["1. Build Time (CLI)"]
-        Spec["OpenAPI 3.0/3.1 Spec"] --> CLI["@admin-kit-yu/cli"]
+        Spec["OpenAPI 3.0/3.1 Spec"] --> CLI["admin-kit-yu CLI"]
         Gemini["Gemini AI Engine"] -.->|Heuristics & Badges| CLI
         CLI --> Config["admin.config.yaml"]
     end
 
     subgraph Runtime["2. Runtime (Backend)"]
         Config --> Server["Express / FastAPI Adapter"]
-        StaticBundle["Static React Assets (dist/)"] --> Server
+        StaticBundle["Static React Assets (dist/public)"] --> Server
     end
 
     subgraph Client["3. Client-Side Presentation"]
-        Server --> SPA["@admin-kit-yu/react Studio"]
+        Server --> SPA["admin-kit-yu/react Studio"]
         SPA --> AST["Safe AST Evaluator (visible_if)"]
         SPA --> RBAC["RBAC Permission Gate"]
         SPA --> Doctor["Doctor Diagnostic Drawer"]
@@ -68,11 +68,11 @@ Run the CLI pull command against any local schema file or running API service:
 
 ```bash
 # Deterministic OpenAPI extraction
-npx @admin-kit-yu/cli pull --source=./openapi.json
+npx admin-kit-yu pull --source=./openapi.json
 
 # Optional: Run with AI enrichment for live badge maps and visibility rules
 export GEMINI_API_KEY="your-api-key"
-npx @admin-kit-yu/cli pull --source=./openapi.json --ai
+npx admin-kit-yu pull --source=./openapi.json --ai
 ```
 
 ### 2. Mount Middleware in Your Backend
@@ -80,12 +80,12 @@ npx @admin-kit-yu/cli pull --source=./openapi.json --ai
 #### Express (Node.js / TypeScript)
 
 ```bash
-pnpm add @admin-kit-yu/express express
+pnpm add admin-kit-yu express
 ```
 
 ```typescript
 import express from "express";
-import { mountAdminStudio } from "@admin-kit-yu/express";
+import { mountAdminStudio } from "admin-kit-yu/express";
 
 const app = express();
 app.use(express.json());
@@ -234,10 +234,15 @@ rbac:
 ```text
 admin-kit/
 ├── packages/
-│   ├── core/                  # @admin-kit-yu/core: Zod schema, AST evaluator, RBAC, HTTP client
-│   ├── cli/                   # @admin-kit-yu/cli: OpenAPI parser, diff engine, AI synthesis
-│   ├── react/                 # @admin-kit-yu/react: Dynamic UI engine, TanStack tables, Doctor drawer
-│   └── express/               # @admin-kit-yu/express: Express router & static bundle middleware
+│   └── admin-kit/             # admin-kit-yu: Unified npm package (core, cli, react, express)
+│       ├── src/
+│       │   ├── core/          # Zod schema, AST evaluator, RBAC, HTTP client
+│       │   ├── cli/           # OpenAPI introspector, diff engine, AI synthesis
+│       │   ├── react/         # Dynamic UI engine, TanStack tables, Doctor drawer
+│       │   └── express/       # Express router & static bundle middleware
+│       ├── studio/            # Self-contained Vite React Studio SPA entrypoint
+│       ├── test/              # Comprehensive test suites
+│       └── package.json       # Subpath exports: ., ./core, ./react, ./express, ./style.css
 ├── adapters/
 │   └── fastapi/               # admin-kit-fastapi: Python Starlette/FastAPI mount adapter
 ├── examples/
@@ -255,26 +260,26 @@ admin-kit/
 
 ## CLI Reference
 
-The `@admin-kit-yu/cli` executable provides end-to-end tooling for configuration management:
+The `admin-kit-yu` (or `admin-kit`) executable provides end-to-end tooling for configuration management:
 
 ```bash
 # Initialize a starter template
-admin-kit init
+npx admin-kit-yu init
 
 # Introspect an OpenAPI spec and write admin.config.yaml
-admin-kit pull --source=./openapi.json
+npx admin-kit-yu pull --source=./openapi.json
 
 # Introspect with AI workflow synthesis (badges, visibility, labels, sensitive fields)
-admin-kit pull --source=./openapi.json --ai
+npx admin-kit-yu pull --source=./openapi.json --ai
 
 # Detect schema drift between your API and local config
-admin-kit diff --source=./openapi.json
+npx admin-kit-yu diff --source=./openapi.json
 
 # Run integrity validation and diagnostic audit
-admin-kit doctor
+npx admin-kit-yu doctor
 
 # Launch a zero-dependency local preview server
-admin-kit studio --port=3000 --config=admin.config.yaml
+npx admin-kit-yu studio --port=3000 --config=admin.config.yaml
 ```
 
 ---
@@ -297,7 +302,7 @@ pnpm install
 pnpm build
 
 # 3. Run automated test suites
-node --experimental-strip-types --test packages/core/test/config.test.ts packages/core/test/evaluator.test.ts packages/core/test/client.test.ts packages/core/test/rbac.test.ts packages/cli/test/cli.test.ts packages/cli/test/ai.test.ts packages/express/test/express.test.ts
+node --experimental-strip-types --test packages/admin-kit/test/config.test.ts packages/admin-kit/test/evaluator.test.ts packages/admin-kit/test/client.test.ts packages/admin-kit/test/rbac.test.ts packages/admin-kit/test/cli.test.ts packages/admin-kit/test/ai.test.ts packages/admin-kit/test/express.test.ts
 ```
 
 ### Versioning

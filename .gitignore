@@ -7,3 +7,5 @@ dist
 .admin-kit/
 .env
 .env*.local
+__pycache__/
+*.pyc

@@ -8,8 +8,7 @@
     "dev": "node src/server.js"
   },
   "dependencies": {
-    "@admin-kit-yu/core": "workspace:*",
-    "@admin-kit-yu/express": "workspace:*",
+    "admin-kit-yu": "workspace:*",
     "express": "^4.19.2"
   }
 }

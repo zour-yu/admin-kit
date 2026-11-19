@@ -14,17 +14,25 @@ def find_workspace_root() -> Path:
     """Finds the monorepo root directory containing pnpm-workspace.yaml or packages/."""
     curr = Path.cwd().resolve()
     for parent in [curr] + list(curr.parents):
-        if (parent / "pnpm-workspace.yaml").exists() or (parent / "packages" / "react").exists():
+        if (
+            (parent / "pnpm-workspace.yaml").exists()
+            or (parent / "packages" / "admin-kit").exists()
+            or (parent / "packages" / "react").exists()
+        ):
             return parent
     return curr
 
 
 def resolve_default_assets_dir() -> Path:
-    """Resolves the pre-compiled @admin-kit-yu/react static dist directory."""
+    """Resolves the pre-compiled admin-kit-yu static dist directory."""
     workspace_root = find_workspace_root()
 
     candidates = [
         Path.cwd() / "dist",
+        workspace_root / "packages" / "admin-kit" / "dist" / "public",
+        workspace_root / "node_modules" / "admin-kit-yu" / "dist" / "public",
+        Path.cwd().parent / "packages" / "admin-kit" / "dist" / "public",
+        Path(__file__).resolve().parent.parent.parent.parent / "packages" / "admin-kit" / "dist" / "public",
         Path.cwd().parent / "packages" / "react" / "dist",
         workspace_root / "packages" / "react" / "dist",
         workspace_root / "node_modules" / "@admin-kit-yu" / "react" / "dist",
@@ -35,7 +43,7 @@ def resolve_default_assets_dir() -> Path:
         if candidate.exists() and (candidate / "index.html").exists():
             return candidate
 
-    return workspace_root / "packages" / "react" / "dist"
+    return workspace_root / "packages" / "admin-kit" / "dist" / "public"
 
 
 def load_yaml_config(config_path: Union[str, Path]) -> Dict[str, Any]:

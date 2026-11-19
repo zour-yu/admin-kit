@@ -31,7 +31,9 @@ def run_tests():
     # 3. Verify Static Bundle Assets
     print("Testing static asset delivery...")
     import glob
-    assets = glob.glob(str(Path(__file__).parent.parent / "react-demo" / "dist" / "assets" / "*.js"))
+    assets = glob.glob(str(Path(__file__).parent.parent.parent / "packages" / "admin-kit" / "dist" / "public" / "assets" / "*.js"))
+    if not assets:
+        assets = glob.glob(str(Path(__file__).parent.parent / "react-demo" / "dist" / "assets" / "*.js"))
     if not assets:
         assets = glob.glob(str(Path(__file__).parent.parent.parent / "packages" / "react" / "dist" / "assets" / "*.js"))
     asset_name = Path(assets[0]).name if assets else "style.css"
