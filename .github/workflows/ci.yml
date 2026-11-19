@@ -42,7 +42,7 @@ jobs:
         run: pnpm build
 
       - name: Run Node test suite
-        run: node --experimental-strip-types --test packages/core/test/config.test.ts packages/core/test/evaluator.test.ts packages/core/test/client.test.ts packages/core/test/rbac.test.ts packages/cli/test/cli.test.ts packages/cli/test/ai.test.ts packages/express/test/express.test.ts
+        run: pnpm --filter admin-kit-yu test
 
   test-python:
     name: Python FastAPI Adapter Tests (${{ matrix.python-version }})

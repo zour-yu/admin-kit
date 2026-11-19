@@ -7,7 +7,8 @@
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
-    "version-packages": "changeset version"
+    "version-packages": "changeset version",
+    "release:publish": "node -e \"if (!process.env.NODE_AUTH_TOKEN) { console.log('::warning::NPM_TOKEN secret is not set in GitHub repository secrets. Skipping publish.'); } else { require('child_process').execSync('pnpm changeset publish', { stdio: 'inherit' }); }\""
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
