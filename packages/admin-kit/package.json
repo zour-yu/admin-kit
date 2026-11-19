@@ -1,6 +1,6 @@
 {
   "name": "admin-kit-yu",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "API-driven admin dashboard generator, OpenAPI introspector, and embedded studio engine",
   "type": "module",
   "main": "./dist/core/index.js",

@@ -2,6 +2,12 @@
 
 All notable changes to the AdminKit project will be documented in this file.
 
+## 0.3.1
+
+### Patch Changes
+
+- **CLI Standalone Execution**: Made `express` dynamic in the `studio` command so CLI commands (`--help`, `--version`, `pull`, `init`, `diff`, `doctor`) run in zero-dependency environments without requiring `express` installed.
+
 ## 0.3.0
 
 ### Major Changes

@@ -1,8 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
 import { Command } from "commander";
-import express from "express";
-import { mountAdminStudio } from "../../express";
 
 export interface StudioOptions {
   config?: string;
@@ -14,11 +12,22 @@ export interface StudioOptions {
  * Spins up a local standalone Express server serving AdminKit Studio.
  */
 export async function startStudioServer(options: StudioOptions = {}): Promise<{
-  app: express.Express;
+  app: any;
   server: import("node:http").Server;
   port: number;
   url: string;
 }> {
+  let expressModule: any;
+  try {
+    expressModule = await import("express");
+  } catch {
+    throw new Error(
+      "AdminKit Studio standalone server requires 'express'. Please install it: npm install express"
+    );
+  }
+  const express = expressModule.default || expressModule;
+  const { mountAdminStudio } = await import("../../express");
+
   const app = express();
   const rawPort = options.port || process.env.PORT || 3333;
   const port = typeof rawPort === "string" ? parseInt(rawPort, 10) : rawPort;

@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name("admin-kit")
   .description("AdminKit CLI - API-driven admin dashboard generator and OpenAPI introspector")
-  .version("0.3.0");
+  .version("0.3.1");
 
 // Register commands
 registerInitCommand(program);
